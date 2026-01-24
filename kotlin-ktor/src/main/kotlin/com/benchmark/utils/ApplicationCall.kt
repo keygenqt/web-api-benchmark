@@ -1,7 +1,7 @@
-package com.benchmark
+package com.benchmark.utils
 
 import com.benchmark.app.Exceptions
-import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.*
 
 /**
  * Get value from params with validate

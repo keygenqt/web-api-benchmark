@@ -1,35 +1,47 @@
-package com.benchmark.cli
+package com.benchmark.db
 
-import picocli.CommandLine
-import picocli.CommandLine.Model.CommandSpec
-import picocli.CommandLine.Spec
-import java.util.concurrent.Callable
+import com.benchmark.app.AppConfig
+import kotlinx.coroutines.Dispatchers
+import org.flywaydb.core.Flyway
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.Database.Companion.connect
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import java.nio.file.Paths
 
 /**
- * Command interface line.
- * @see <a href="https://picocli.info/">Picocli</a>
+ * Init database.
  */
-@CommandLine.Command(
-    name = "kotlin-ktor",
-    version = ["Version: 0.0.1"],
-    description = ["Kotlin Ktor - Ktor REST API Demo Application."],
-    mixinStandardHelpOptions = true,
-    sortOptions = false,
-    subcommands = [
-        StartArgs::class,
-        ToolsArgs::class,
-    ]
-)
-class AppCLI(
-    private val args: Array<String>
-) : Callable<Int> {
-    @Spec lateinit var spec: CommandSpec
-
-    override fun call(): Int {
-        if (args.isEmpty()) {
-            spec.commandLine().usage(System.out)
-            return 0
+fun configureDatabase(
+    appConfig: AppConfig
+): Database {
+    val database = connect(
+        url = appConfig.postgres.url,
+        user = appConfig.postgres.user,
+        password = appConfig.postgres.password,
+    )
+    val cwd = Paths.get("").toAbsolutePath()
+    val locations = mutableListOf("filesystem:${cwd}/migrations").apply {
+        if (appConfig.server.development) {
+            add("filesystem:${cwd}/../../migrations")
         }
-        return 0
     }
+    val flyway = Flyway.configure()
+        .sqlMigrationPrefix("")
+        .sqlMigrationSeparator("_")
+        .locations(*locations.toTypedArray())
+        .dataSource(appConfig.postgres.url, appConfig.postgres.user, appConfig.postgres.password)
+        .load()
+    flyway.info()
+    flyway.migrate()
+    return database
+}
+
+/**
+ * Extension transaction.
+ */
+suspend fun <T> Database.transaction(block: suspend () -> T): T {
+    return newSuspendedTransaction(
+        context = Dispatchers.IO,
+        db = this
+    ) { block() }
 }

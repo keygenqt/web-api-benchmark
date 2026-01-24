@@ -1,13 +1,13 @@
 package com.benchmark.app
 
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import kotlinx.serialization.Serializable
 
 /**
  * Model
  */
 @Serializable
-data class ExceptionModel(
+data class AppError(
     val code: Int,
     val message: String,
 )

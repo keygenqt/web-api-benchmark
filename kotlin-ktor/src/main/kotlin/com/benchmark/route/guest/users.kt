@@ -1,21 +1,19 @@
 package com.benchmark.route.guest
 
 import com.benchmark.db.services.UserService
-import com.benchmark.utils.getNumberParam
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
-fun Route.guestData() {
-
+/**
+ * Users routing for guests.
+ */
+fun Route.guestUsers() {
     val dataService: UserService by inject()
-
-    route("/data") {
-        get("/{id}") {
-            // get request
-            val id = call.getNumberParam()
+    route("/users") {
+        get {
             // act
-            val response = dataService.findByNumber(id)
+            val response = dataService.findAll()
             // response
             call.respond(response)
         }

@@ -1,0 +1,21 @@
+[package]
+name = "rust-axum"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = { version = "0.8", features = ["macros"] }
+colored = "3.1.1"
+tokio = { version = "1.49", features = ["full"] }
+clap = { version = "4.5.54", features = ["derive"] }
+clap-cargo = "0.18.3"
+chrono = "0.4.43"
+serde_with = { version = "3.16", features = ["chrono"] }
+diesel = { version = "2", features = ["postgres", "chrono"] }
+diesel_migrations = "2"
+deadpool-diesel = { version = "0.6.1", features = ["postgres"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.149"
+hocon-rs = "0.1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

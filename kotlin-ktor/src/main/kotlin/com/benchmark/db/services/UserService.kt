@@ -1,19 +1,26 @@
 package com.benchmark.db.services
 
-import com.benchmark.db.entities.Data
-import com.benchmark.db.entities.DataEntity
+import com.benchmark.db.entities.User
+import com.benchmark.db.entities.UserEntity
+import com.benchmark.db.entities.UserModel
 import com.benchmark.db.transaction
-import com.benchmark.models.DataModel
 import org.jetbrains.exposed.sql.Database
 
 /**
- * Service entity data table.
+ * Service entity users table.
  */
-class DataService(private val database: Database) {
+class UserService(private val database: Database) {
     /**
-     * Find entity by nuber.
+     * Find all register user.
      */
-    suspend fun findByNumber(id: Int): List<DataModel> = database.transaction {
-        DataEntity.find { (Data.title like "%$id%") }.map { DataModel(it.title, it.createAt) }
+    suspend fun findAll(): List<UserModel> = database.transaction {
+        UserEntity.find { (User.passwd.isNotNull() ) }.map {
+            UserModel(
+                email = it.email,
+                fname = it.fname,
+                lname = it.lname,
+                createAt = it.createAt.toEpochMilli(),
+            )
+        }
     }
 }

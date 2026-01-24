@@ -1,10 +1,13 @@
-package com.benchmark.app
+package com.benchmark.cli
 
 import picocli.CommandLine
 import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Spec
 import java.util.concurrent.Callable
 
+/**
+ * Command for work on server
+ */
 @CommandLine.Command(
     name = "tools",
     aliases = ["-t"],

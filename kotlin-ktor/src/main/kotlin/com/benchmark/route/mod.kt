@@ -1,58 +1,123 @@
-package com.benchmark.db
+package com.benchmark.route
 
+import ch.qos.logback.classic.Logger
 import com.benchmark.app.AppConfig
-import kotlinx.coroutines.Dispatchers
-import org.flywaydb.core.Flyway
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import com.benchmark.app.AppError
+import com.benchmark.app.Exceptions
+import com.benchmark.db.configureDatabase
+import com.benchmark.db.services.UserService
+import com.benchmark.route.guest.guestHome
+import com.benchmark.route.guest.guestUsers
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.*
+import io.ktor.server.plugins.calllogging.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import kotlinx.serialization.json.Json
+import org.koin.dsl.module
+import org.koin.ktor.plugin.Koin
+import org.slf4j.Logger.ROOT_LOGGER_NAME
+import org.slf4j.LoggerFactory
+import ch.qos.logback.classic.Level as LogbackLevel
+import org.koin.core.logger.Level as KoinLevel
+import org.slf4j.event.Level as Slf4jLevel
 
 /**
- * Init database.
+ * Init Ktor server.
  */
-fun configureDatabase(
+fun Application.configureServer(
     appConfig: AppConfig
-): Database {
-    return Database.connectWithFlyway(
-        url = appConfig.postgres.url,
-        user = appConfig.postgres.user,
-        password = appConfig.postgres.password,
-        migration = "com/benchmark/migration"
-    ) ?: throw RuntimeException("Error connect to DB!")
+) {
+    // Logger
+    configureLogging(appConfig.server.development)
+
+    // Init database
+    val database = configureDatabase(appConfig)
+
+    // Init Koin
+    install(Koin) {
+        printLogger(if (appConfig.server.development) KoinLevel.DEBUG else KoinLevel.NONE)
+        modules(
+            module {
+                single { appConfig }
+                single { UserService(database) }
+            }
+        )
+    }
+
+    // Init response
+    install(ContentNegotiation) {
+        json(
+            Json {
+                prettyPrint = true
+                isLenient = true
+                ignoreUnknownKeys = true
+                coerceInputValues = true
+            }
+        )
+    }
+
+    // Init catch errors
+    install(StatusPages) {
+        configureHandleError()
+    }
+
+    // Init Routing
+    routing {
+        guestHome()
+        route("/api") {
+            guestUsers()
+        }
+    }
 }
 
-/**
- * Init migration.
- */
-private fun Database.Companion.connectWithFlyway(
-    url: String,
-    user: String,
-    password: String,
-    migration: String
-): Database? {
-    return try {
-        val database = connect(
-            url = url,
-            user = user,
-            password = password,
-        )
-        val flyway = Flyway.configure()
-            .locations(migration)
-            .dataSource(url, user, password)
-            .load()
-        flyway.info()
-        flyway.migrate()
-        database
-    } catch (e: Exception) {
-        null
+private fun Application.configureLogging(
+    isDevelopment: Boolean
+) {
+    // logger db
+    (LoggerFactory.getLogger(ROOT_LOGGER_NAME) as Logger).apply {
+        level = if (isDevelopment) LogbackLevel.DEBUG else LogbackLevel.OFF
+    }
+
+    // configuration
+    install(CallLogging) {
+        level = if (isDevelopment) Slf4jLevel.DEBUG else Slf4jLevel.ERROR
     }
 }
 
 /**
- * Extension transaction.
+ * Catch errors.
  */
-suspend fun <T> Database.transaction(block: suspend () -> T): T {
-    return newSuspendedTransaction(
-        context = Dispatchers.IO,
-        db = this
-    ) { block() }
+private fun StatusPagesConfig.configureHandleError() {
+    status(HttpStatusCode.Unauthorized, HttpStatusCode.NotFound) { call, cause ->
+        call.respond(
+            status = cause,
+            message = AppError(
+                code = cause.value,
+                message = cause.description
+            )
+        )
+    }
+    exception<Throwable> { call, cause ->
+        if (cause is Exceptions) {
+            call.respond(
+                status = cause.status,
+                message = AppError(
+                    code = cause.status.value,
+                    message = cause.status.description
+                )
+            )
+        } else {
+            call.respond(
+                status = HttpStatusCode.InternalServerError,
+                message = AppError(
+                    code = HttpStatusCode.InternalServerError.value,
+                    message = cause.message ?: HttpStatusCode.InternalServerError.description
+                )
+            )
+        }
+    }
 }

@@ -1,0 +1,7 @@
+axum:
+  development: true
+  port: 8080
+postgres:
+  url: "jdbc:postgresql://localhost:5432/api_benchmark"
+  user: postgres
+  password: 334400ddgg

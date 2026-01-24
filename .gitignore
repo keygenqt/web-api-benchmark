@@ -1,0 +1,11 @@
+### macOS ###
+.DS_Store
+
+### IDEA ###
+.idea
+
+### VS Code ###
+.vscode/
+
+### Application ###
+_*.conf

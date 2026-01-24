@@ -1,5 +1,6 @@
-package com.benchmark.app
+package com.benchmark.cli
 
+import com.benchmark.app.*
 import picocli.CommandLine
 import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Spec
@@ -7,12 +8,11 @@ import java.util.concurrent.Callable
 
 /**
  * Command interface line.
- * @see <a href="https://picocli.info/">Picocli</a>
  */
 @CommandLine.Command(
-    name = "kotlin-ktor",
-    version = ["Version: 0.0.1"],
-    description = ["Kotlin Ktor - Ktor REST API Demo Application."],
+    name = AppInfo.NAME,
+    version = ["Version: ${AppInfo.VERSION}"],
+    description = [AppInfo.ABOUT],
     mixinStandardHelpOptions = true,
     sortOptions = false,
     subcommands = [

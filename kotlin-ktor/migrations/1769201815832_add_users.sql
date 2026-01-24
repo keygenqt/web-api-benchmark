@@ -1,8 +1,8 @@
-CREATE TABLE users (
+CREATE TABLE users_ktor (
     id          SERIAL PRIMARY KEY,
     email       VARCHAR(255) UNIQUE NOT NULL,
     fname       VARCHAR(255) NOT NULL,
     lname       VARCHAR(255) NOT NULL,
-    paswd       VARCHAR(255),
+    passwd      VARCHAR(255),
     created_at  TIMESTAMP NOT NULL
 );
