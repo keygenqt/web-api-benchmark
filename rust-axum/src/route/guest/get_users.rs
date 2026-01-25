@@ -12,7 +12,7 @@ pub fn get() -> MethodRouter<AppRoute> {
     routing::get(
         async |State(app): State<AppRoute>| -> Result<AppJson<Vec<UserModel>>, AppError> {
             // Get users list
-            let result = UserService::get_list(app.db).await?;
+            let result = UserService::get_list(&app.db).await?;
             // Result
             Ok(AppJson(result))
         },

@@ -13,7 +13,7 @@ pub mod services;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
-pub async fn configure_db(config: AppConfig) -> Pool<Manager<PgConnection>> {
+pub async fn configure_db(config: &AppConfig) -> Pool<Manager<PgConnection>> {
     // Create connect url
     let url = config.postgres.url.replace(
         "postgres://",
@@ -41,7 +41,7 @@ pub fn internal_error<E: std::error::Error>(err: E) -> AppError {
     AppError::new(StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
 }
 
-pub async fn get_poll(pool: Pool<Manager<PgConnection>>) -> Result<Object, AppError> {
+pub async fn get_poll(pool: &Pool<Manager<PgConnection>>) -> Result<Object, AppError> {
     Ok(pool.get().await.map_err(internal_error)?)
 }
 

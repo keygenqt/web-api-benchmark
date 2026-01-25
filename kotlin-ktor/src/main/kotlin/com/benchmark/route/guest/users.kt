@@ -6,7 +6,7 @@ import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
 /**
- * Users routing for guests.
+ * Users routing for guests
  */
 fun Route.guestUsers() {
     val dataService: UserService by inject()

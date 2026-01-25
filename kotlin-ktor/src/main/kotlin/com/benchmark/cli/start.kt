@@ -8,16 +8,11 @@ import io.ktor.server.netty.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.hocon.Hocon
 import kotlinx.serialization.hocon.decodeFromConfig
-import org.slf4j.Logger.ROOT_LOGGER_NAME
-import org.slf4j.LoggerFactory
 import picocli.CommandLine
 import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Spec
 import java.io.File
 import java.util.concurrent.Callable
-import java.util.logging.Logger
-import ch.qos.logback.classic.Level.DEBUG
-import ch.qos.logback.classic.Level.OFF
 
 /**
  * Command for start server
@@ -50,7 +45,7 @@ class StartArgs : Callable<Int> {
             throw IllegalArgumentException("File configuration not found.")
         }
 
-        // Load configration
+        // Load configuration
         val config = ConfigFactory.parseString(path.readText())
         val appConfig = Hocon.decodeFromConfig<AppConfig>(config)
 

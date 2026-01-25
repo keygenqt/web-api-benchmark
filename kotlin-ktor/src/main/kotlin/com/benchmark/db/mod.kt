@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import java.nio.file.Paths
 
 /**
- * Init database.
+ * Init database
  */
 fun configureDatabase(
     appConfig: AppConfig

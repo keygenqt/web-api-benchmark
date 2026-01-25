@@ -11,6 +11,7 @@ mod db;
 mod route;
 mod utils;
 
+/// Entry point to the application
 #[tokio::main]
 async fn main() {
     if AppCLI::parse().version {

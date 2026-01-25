@@ -19,3 +19,5 @@ serde_json = "1.0.149"
 hocon-rs = "0.1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+passwords = "3.1.16"
+argon2 = "0.5.3"

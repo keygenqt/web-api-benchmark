@@ -26,7 +26,7 @@ import org.koin.core.logger.Level as KoinLevel
 import org.slf4j.event.Level as Slf4jLevel
 
 /**
- * Init Ktor server.
+ * Init Ktor server
  */
 fun Application.configureServer(
     appConfig: AppConfig

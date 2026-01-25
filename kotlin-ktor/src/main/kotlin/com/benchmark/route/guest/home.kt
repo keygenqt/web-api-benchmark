@@ -5,7 +5,7 @@ import io.ktor.server.routing.*
 import kotlinx.html.*
 
 /**
- * Main page HTML.
+ * Main page HTML
  */
 fun Route.guestHome() {
     get("/") {

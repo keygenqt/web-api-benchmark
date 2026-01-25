@@ -9,18 +9,18 @@ import org.jetbrains.exposed.sql.javatime.CurrentTimestamp
 import org.jetbrains.exposed.sql.javatime.timestamp
 
 /**
- * Table users.
+ * Table users
  */
 object User : IntIdTable("users_ktor") {
     val email = varchar("email", length = 255).uniqueIndex()
     val fname = varchar("fname", length = 255)
     val lname = varchar("lname", length = 255)
-    val passwd = varchar("passwd", length = 255)
+    val password = varchar("password", length = 255)
     val createAt = timestamp("created_at").defaultExpression(CurrentTimestamp)
 }
 
 /**
- * Entity.
+ * Entity
  */
 class UserEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<UserEntity>(User)
@@ -28,12 +28,12 @@ class UserEntity(id: EntityID<Int>) : IntEntity(id) {
     var email by User.email
     var fname by User.fname
     var lname by User.lname
-    var passwd by User.passwd
+    var password by User.password
     var createAt by User.createAt
 }
 
 /**
- * Model user entry [UserEntity].
+ * Model user entry [UserEntity]
  */
 @Serializable
 data class UserModel(

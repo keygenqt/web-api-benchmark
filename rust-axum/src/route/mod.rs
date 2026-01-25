@@ -11,7 +11,7 @@ use crate::db::configure_db;
 #[path = "guest/mod.rs"]
 mod guest;
 
-pub async fn configure_route(config: AppConfig) -> Router {
+pub async fn configure_route(config: &AppConfig) -> Router {
     Router::new()
         .route("/", guest::get_users::get())
         .with_state(AppRoute::new(config.clone(), configure_db(config).await))

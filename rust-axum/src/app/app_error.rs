@@ -8,8 +8,8 @@ use crate::app::app_json::AppJson;
 /// Application custom Error
 #[derive(Debug, Clone)]
 pub struct AppError {
-    code: StatusCode,
-    message: String,
+    pub code: StatusCode,
+    pub message: String,
 }
 
 impl AppError {
@@ -18,6 +18,7 @@ impl AppError {
     }
 }
 
+// Implementation axum response
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         // Response data

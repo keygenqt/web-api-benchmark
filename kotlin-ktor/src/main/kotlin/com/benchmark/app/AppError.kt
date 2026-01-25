@@ -4,7 +4,7 @@ import io.ktor.http.*
 import kotlinx.serialization.Serializable
 
 /**
- * Model
+ * Application custom Error
  */
 @Serializable
 data class AppError(
@@ -13,7 +13,7 @@ data class AppError(
 )
 
 /**
- * Errors.
+ * Errors
  */
 sealed class Exceptions(
     open val status: HttpStatusCode,

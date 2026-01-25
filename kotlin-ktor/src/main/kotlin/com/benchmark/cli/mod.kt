@@ -7,7 +7,7 @@ import picocli.CommandLine.Spec
 import java.util.concurrent.Callable
 
 /**
- * Command interface line.
+ * Command interface line
  */
 @CommandLine.Command(
     name = AppInfo.NAME,

@@ -7,14 +7,14 @@ import com.benchmark.db.transaction
 import org.jetbrains.exposed.sql.Database
 
 /**
- * Service entity users table.
+ * Service entity users table
  */
 class UserService(private val database: Database) {
     /**
-     * Find all register user.
+     * Find all register user
      */
     suspend fun findAll(): List<UserModel> = database.transaction {
-        UserEntity.find { (User.passwd.isNotNull() ) }.map {
+        UserEntity.find { (User.password.isNotNull() ) }.map {
             UserModel(
                 email = it.email,
                 fname = it.fname,
