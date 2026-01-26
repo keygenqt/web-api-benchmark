@@ -3,8 +3,16 @@ name = "rust-axum"
 version = "0.1.0"
 edition = "2024"
 
+[profile.release]
+strip = "symbols"
+lto = true
+panic = "abort"
+incremental = false
+codegen-units = 1
+
 [dependencies]
 axum = { version = "0.8", features = ["macros"] }
+tower-http = { version = "0.6.8", features = ["fs", "trace"] }
 colored = "3.1.1"
 tokio = { version = "1.49", features = ["full"] }
 clap = { version = "4.5.54", features = ["derive"] }
@@ -20,4 +28,4 @@ hocon-rs = "0.1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 passwords = "3.1.16"
-argon2 = "0.5.3"
+argon2 = { version = "0.5", features = ["std"] }

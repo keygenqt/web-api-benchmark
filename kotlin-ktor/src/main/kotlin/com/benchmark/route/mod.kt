@@ -6,11 +6,11 @@ import com.benchmark.app.AppError
 import com.benchmark.app.Exceptions
 import com.benchmark.db.configureDatabase
 import com.benchmark.db.services.UserService
-import com.benchmark.route.guest.guestHome
 import com.benchmark.route.guest.guestUsers
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.http.content.*
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
@@ -33,10 +33,8 @@ fun Application.configureServer(
 ) {
     // Logger
     configureLogging(appConfig.server.development)
-
     // Init database
     val database = configureDatabase(appConfig)
-
     // Init Koin
     install(Koin) {
         printLogger(if (appConfig.server.development) KoinLevel.DEBUG else KoinLevel.NONE)
@@ -47,7 +45,6 @@ fun Application.configureServer(
             }
         )
     }
-
     // Init response
     install(ContentNegotiation) {
         json(
@@ -59,15 +56,15 @@ fun Application.configureServer(
             }
         )
     }
-
     // Init catch errors
     install(StatusPages) {
         configureHandleError()
     }
-
     // Init Routing
     routing {
-        guestHome()
+        staticResources("/", "assets") {
+            enableAutoHeadResponse()
+        }
         route("/api") {
             guestUsers()
         }
@@ -81,7 +78,6 @@ private fun Application.configureLogging(
     (LoggerFactory.getLogger(ROOT_LOGGER_NAME) as Logger).apply {
         level = if (isDevelopment) LogbackLevel.DEBUG else LogbackLevel.OFF
     }
-
     // configuration
     install(CallLogging) {
         level = if (isDevelopment) Slf4jLevel.DEBUG else Slf4jLevel.ERROR

@@ -3,6 +3,6 @@ CREATE TABLE users_ktor (
     email       VARCHAR(255) UNIQUE NOT NULL,
     fname       VARCHAR(255) NOT NULL,
     lname       VARCHAR(255) NOT NULL,
-    password    VARCHAR(255),
-    created_at  TIMESTAMP NOT NULL
+    pwd_hash    VARCHAR(255),
+    created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

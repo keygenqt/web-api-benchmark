@@ -29,31 +29,28 @@ class StartArgs : Callable<Int> {
     @CommandLine.Option(names = ["-h", "--help"], description = ["Show this help message and exit."])
     private var help: Boolean = false
 
-    @CommandLine.Option(names = ["--config", "-c"], description = ["Path to the configuration file."])
-    private val path: File? = null
+    @CommandLine.Option(names = ["-c", "--config"], description = ["Path to the configuration file."])
+    private val config: File? = null
 
     @OptIn(ExperimentalSerializationApi::class)
     override fun call(): Int {
         // Show help
-        if (help || path == null) {
+        if (help || config == null) {
             spec.commandLine().usage(System.out)
             return 0
         }
-
         // Check path to configuration
-        if (!path.exists() || !path.isFile) {
+        if (!config.exists() || !config.isFile) {
             throw IllegalArgumentException("File configuration not found.")
         }
-
         // Load configuration
-        val config = ConfigFactory.parseString(path.readText())
+        val config = ConfigFactory.parseString(config.readText())
         val appConfig = Hocon.decodeFromConfig<AppConfig>(config)
-
         // Start server
         embeddedServer(Netty, port = appConfig.deployment.port, host = appConfig.deployment.host) {
             configureServer(appConfig)
         }.start(wait = true)
-
+        // Exit success
         return 0
     }
 }

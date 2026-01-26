@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use axum::{Router, middleware::Next};
 use axum::{extract::Request, middleware::from_fn, response::Response};
+use tower_http::services::ServeDir;
 
 use crate::app::app_config::AppConfig;
 use crate::app::app_error::AppError;
@@ -13,9 +14,10 @@ mod guest;
 
 pub async fn configure_route(config: &AppConfig) -> Router {
     Router::new()
-        .route("/", guest::get_users::get())
+        .route("/api/users", guest::users::get())
         .with_state(AppRoute::new(config.clone(), configure_db(config).await))
         .layer(from_fn(log_app_errors))
+        .fallback_service(ServeDir::new("assets"))
 }
 
 async fn log_app_errors(request: Request, next: Next) -> Response {

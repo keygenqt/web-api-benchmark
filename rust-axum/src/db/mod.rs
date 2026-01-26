@@ -9,6 +9,7 @@ use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 use crate::app::{app_config::AppConfig, app_error::AppError};
 
 pub mod entities;
+pub mod models;
 pub mod services;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");

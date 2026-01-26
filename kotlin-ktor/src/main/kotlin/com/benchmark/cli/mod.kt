@@ -1,6 +1,6 @@
 package com.benchmark.cli
 
-import com.benchmark.app.*
+import com.benchmark.app.AppInfo
 import picocli.CommandLine
 import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Spec
@@ -23,7 +23,8 @@ import java.util.concurrent.Callable
 class AppCLI(
     private val args: Array<String>
 ) : Callable<Int> {
-    @Spec lateinit var spec: CommandSpec
+    @Spec
+    lateinit var spec: CommandSpec
 
     override fun call(): Int {
         if (args.isEmpty()) {

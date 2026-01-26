@@ -60,8 +60,14 @@ dependencies {
     implementation(libs.serialization.hocon)
     implementation(libs.config.hocon)
 
+    // security
+    implementation(libs.security.crypto)
+    implementation(libs.security.logging)
+    implementation(libs.security.jdk18on)
+    implementation("commons-codec:commons-codec:1.20.0")
+
     // Other
     implementation(libs.kotlinx.html)
-    implementation(libs.picocli)
     implementation(libs.logback.classic)
+    implementation(libs.picocli)
 }

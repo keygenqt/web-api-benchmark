@@ -3,7 +3,12 @@ use std::{fs, path::PathBuf};
 use clap::Args;
 use colored::Colorize;
 
-use crate::{app::app_config::AppConfig, db::{configure_db, entities::user_entity::UserNewModel, services::user_service::UserService}, exit_error, print_error, print_success, utils::path::get_relative_path_canonicalize};
+use crate::{
+    app::app_config::AppConfig,
+    db::{configure_db, models::user_model::UserModel, services::user_service::UserService},
+    exit_error, print_error, print_success,
+    utils::path::get_relative_path_canonicalize,
+};
 
 #[derive(Args)]
 #[command(arg_required_else_help = true)]
@@ -25,7 +30,7 @@ pub struct ToolsArgs {
 pub async fn run(arg: ToolsArgs) {
     let config = match get_relative_path_canonicalize(&arg.config) {
         Some(path) => {
-            let contents = fs::read_to_string(path).unwrap();
+            let contents = fs::read_to_string(path.clone()).expect(&format!("not read file: {}", path.to_string_lossy()));
             match hocon_rs::Config::parse_str::<AppConfig>(&contents, None) {
                 Ok(result) => result,
                 Err(_) => exit_error!("error read config"),
@@ -37,23 +42,36 @@ pub async fn run(arg: ToolsArgs) {
         match get_relative_path_canonicalize(&users) {
             Some(path) => {
                 // Read json
-                let data = fs::read_to_string(path).unwrap();
+                let data = fs::read_to_string(path.clone()).expect(&format!("not read file: {}", path.to_string_lossy()));
                 // Parse json
-                let mut list: Vec<UserNewModel> = serde_json::from_str(&data).unwrap();
+                let mut list: Vec<UserModel> = serde_json::from_str(&data).unwrap();
                 // Create db instance
                 let pool = configure_db(&config).await;
                 // Loop users
                 for user in &mut list {
                     // Gen random password for user
-                    let password = user.password_update(&config.server.salt);
+                    user.password_up();
                     // Insert data
-                    match UserService::new(user.clone(), &pool).await {
-                        Ok(user) => {
-                            print_success!("{} user {}, password: {}", "✓".green(), user.email.blue(), password.cyan())
-                        },
+                    match UserService::new(&user, &pool).await {
+                        Ok(_) => {
+                            print_success!(
+                                "{} user {}, password: {}",
+                                "✓".green(),
+                                user.email.blue(),
+                                user.password
+                                    .clone()
+                                    .expect("password not available")
+                                    .cyan()
+                            )
+                        }
                         Err(err) => {
-                            print_error!("{} user {}: {}", "✗".red(), user.email.blue(), err.message)
-                        },
+                            print_error!(
+                                "{} user {}: {}",
+                                "✗".red(),
+                                user.email.blue(),
+                                err.message
+                            )
+                        }
                     }
                 }
             }

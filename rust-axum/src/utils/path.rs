@@ -13,21 +13,21 @@ pub fn get_path_current() -> PathBuf {
 // Get full path
 pub fn get_relative_path(path: &PathBuf) -> PathBuf {
     let path_str = path.to_string_lossy().to_string();
-        // Check relative path
+    // Check just file
     let path_str = if !path_str.contains("/") {
         format!("./{}", path_str)
     } else {
         path_str
     };
-    // Check relative path
-    let path_str = if !path_str.starts_with("./") && !path_str.starts_with("~/") && !path_str.starts_with("/") {
-        format!("{}/", get_path_current().to_string_lossy())
+    // Check start path "../"
+    let path_str = if path_str.starts_with("../") {
+        format!("./{}", path_str)
     } else {
         path_str
     };
-    // Check relative path
+    // Check start path "./"
     let path_str = if path_str.starts_with("./") {
-        path_str.replacen("./", &format!("{}/", get_path_current().to_string_lossy()), 1)
+        path_str.replacen("./", &format!("{}/", &get_path_current().to_string_lossy()), 1)
     } else {
         path_str
     };

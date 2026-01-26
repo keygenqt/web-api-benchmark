@@ -1,11 +1,10 @@
 package com.benchmark.db
 
 import com.benchmark.app.AppConfig
-import kotlinx.coroutines.Dispatchers
 import org.flywaydb.core.Flyway
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.Database.Companion.connect
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.Database.Companion.connect
+import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 import java.nio.file.Paths
 
 /**
@@ -26,6 +25,7 @@ fun configureDatabase(
         }
     }
     val flyway = Flyway.configure()
+        .baselineOnMigrate(true)
         .sqlMigrationPrefix("")
         .sqlMigrationSeparator("_")
         .locations(*locations.toTypedArray())
@@ -40,8 +40,5 @@ fun configureDatabase(
  * Extension transaction.
  */
 suspend fun <T> Database.transaction(block: suspend () -> T): T {
-    return newSuspendedTransaction(
-        context = Dispatchers.IO,
-        db = this
-    ) { block() }
+    return suspendTransaction(this) { block() }
 }

@@ -5,7 +5,7 @@ use axum::{
 
 use crate::{
     app::{app_error::AppError, app_json::AppJson, app_route::AppRoute},
-    db::{entities::user_entity::UserModel, services::user_service::UserService},
+    db::{models::user_model::UserModel, services::user_service::UserService},
 };
 
 pub fn get() -> MethodRouter<AppRoute> {
