@@ -27,7 +27,11 @@ pub fn get_relative_path(path: &PathBuf) -> PathBuf {
     };
     // Check start path "./"
     let path_str = if path_str.starts_with("./") {
-        path_str.replacen("./", &format!("{}/", &get_path_current().to_string_lossy()), 1)
+        path_str.replacen(
+            "./",
+            &format!("{}/", &get_path_current().to_string_lossy()),
+            1,
+        )
     } else {
         path_str
     };

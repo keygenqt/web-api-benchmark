@@ -1,7 +1,6 @@
 package com.benchmark.db.models
 
 import com.benchmark.db.entities.UserEntity
-import com.benchmark.utils.Password
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
@@ -11,6 +10,7 @@ import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
  */
 @Serializable
 data class UserModel(
+    val id: Int? = null,
     val email: String,
     val fname: String,
     val lname: String,
@@ -24,10 +24,12 @@ data class UserModel(
         return encoder.matches(password, this.password)
     }
 
-    fun passwordUpdate(): UserModel {
-        val password = Password.generateRandomPassword()
-        val encoder: Argon2PasswordEncoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
-        val hash = encoder.encode(password)
-        return this.copy(pwdHash = hash, password = password)
+    fun updateHash(): UserModel {
+        if (password != null) {
+            val encoder: Argon2PasswordEncoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
+            val hash = encoder.encode(password)
+            return this.copy(pwdHash = hash)
+        }
+        throw RuntimeException("Password expected")
     }
 }

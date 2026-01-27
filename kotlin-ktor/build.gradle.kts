@@ -38,7 +38,6 @@ dependencies {
     implementation(libs.ktor.server.status.pages)
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.server.content.json)
-    implementation(libs.ktor.server.html.builder)
     implementation(libs.ktor.server.call.logging)
 
     // DB
@@ -64,10 +63,9 @@ dependencies {
     implementation(libs.security.crypto)
     implementation(libs.security.logging)
     implementation(libs.security.jdk18on)
-    implementation("commons-codec:commons-codec:1.20.0")
+    implementation(libs.security.codec)
 
     // Other
-    implementation(libs.kotlinx.html)
     implementation(libs.logback.classic)
     implementation(libs.picocli)
 }

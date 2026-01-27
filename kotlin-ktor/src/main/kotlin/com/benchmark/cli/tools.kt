@@ -79,7 +79,7 @@ class ToolsArgs : Callable<Int> {
         val usersJson: List<UserModel> = Json.decodeFromString(pathJson.readText())
         // Loop users
         usersJson.forEach { model ->
-            val user = model.passwordUpdate()
+            val user = model.updateHash()
             try {
                 runBlocking {
                     userService.insert(
@@ -88,7 +88,7 @@ class ToolsArgs : Callable<Int> {
                         lname = user.lname,
                         pwdHash = user.pwdHash!!,
                     )
-                    println("""✓ ${user.email} user {}, password: ${user.password}""")
+                    println("""✓ user ${user.email}, password: ${user.password}""")
                 }
             } catch (e: Exception) {
                 println(

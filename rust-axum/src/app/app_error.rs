@@ -16,6 +16,13 @@ impl AppError {
     pub fn new(code: StatusCode, message: String) -> Self {
         Self { code, message }
     }
+
+    pub fn new_404() -> Self {
+        Self {
+            code: StatusCode::NOT_FOUND,
+            message: "Not Found".to_string(),
+        }
+    }
 }
 
 // Implementation axum response

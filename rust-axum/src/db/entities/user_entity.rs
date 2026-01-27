@@ -10,7 +10,7 @@ diesel::table! {
         fname -> VarChar,
         lname -> VarChar,
         pwd_hash -> Nullable<VarChar>,
-        created_at -> Timestamp,
+        create_at -> Timestamp,
     }
 }
 
@@ -24,7 +24,7 @@ pub struct UserEntity {
     pub lname: String,
     pub pwd_hash: Option<String>,
     #[serde_as(as = "TimestampMilliSeconds<i64>")]
-    pub created_at: NaiveDateTime,
+    pub create_at: NaiveDateTime,
 }
 
 #[serde_as]
@@ -36,5 +36,5 @@ pub struct UserNewEntity {
     pub lname: String,
     pub pwd_hash: Option<String>,
     #[serde_as(as = "TimestampMilliSeconds<i64>")]
-    pub created_at: NaiveDateTime,
+    pub create_at: NaiveDateTime,
 }

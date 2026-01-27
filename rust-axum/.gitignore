@@ -5,7 +5,7 @@
 .vscode/
 
 ### Application ###
-_*.conf
+.*.conf
 
 ### Rust ###
 /target

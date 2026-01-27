@@ -49,7 +49,6 @@ fun Application.configureServer(
     install(ContentNegotiation) {
         json(
             Json {
-                prettyPrint = true
                 isLenient = true
                 ignoreUnknownKeys = true
                 coerceInputValues = true

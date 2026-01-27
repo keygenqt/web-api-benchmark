@@ -1,10 +1,8 @@
 use argon2::{
-    Argon2, Params, PasswordHash, PasswordHasher, PasswordVerifier,
-    password_hash::SaltString,
+    Argon2, Params, PasswordHash, PasswordHasher, PasswordVerifier, password_hash::SaltString,
     password_hash::rand_core::OsRng,
 };
 use chrono::NaiveDateTime;
-use passwords::PasswordGenerator;
 use serde::{Deserialize, Serialize};
 use serde_with::{TimestampMilliSeconds, serde_as};
 
@@ -20,11 +18,13 @@ pub struct UserModel {
     pub email: String,
     pub fname: String,
     pub lname: String,
+    #[serde(skip_serializing)]
     pub pwd_hash: Option<String>,
+    #[serde(skip_serializing)]
     pub password: Option<String>,
     #[serde(default = "utils::time::now")]
     #[serde_as(as = "TimestampMilliSeconds<i64>")]
-    pub created_at: NaiveDateTime,
+    pub create_at: NaiveDateTime,
 }
 
 #[allow(dead_code)]
@@ -37,30 +37,7 @@ impl UserModel {
             lname: entity.lname.clone(),
             pwd_hash: entity.pwd_hash.clone(),
             password: None,
-            created_at: entity.created_at,
-        }
-    }
-
-    pub fn from_new_entity(entity: &UserNewEntity) -> Self {
-        Self {
-            id: None,
-            email: entity.email.clone(),
-            fname: entity.fname.clone(),
-            lname: entity.lname.clone(),
-            pwd_hash: entity.pwd_hash.clone(),
-            password: None,
-            created_at: entity.created_at,
-        }
-    }
-
-    pub fn as_entity(&self) -> UserEntity {
-        UserEntity {
-            id: self.id.expect("is new entity"),
-            email: self.email.clone(),
-            fname: self.fname.clone(),
-            lname: self.lname.clone(),
-            pwd_hash: self.pwd_hash.clone(),
-            created_at: self.created_at,
+            create_at: entity.create_at,
         }
     }
 
@@ -70,24 +47,13 @@ impl UserModel {
             fname: self.fname.clone(),
             lname: self.lname.clone(),
             pwd_hash: self.pwd_hash.clone(),
-            created_at: self.created_at,
+            create_at: self.create_at,
         }
     }
 
-    pub fn is_new(&self) -> bool {
-        self.id.is_none()
-    }
-
     /// Create password hash
-    pub fn password_up(&mut self) {
-        let pg = PasswordGenerator::new()
-            .length(12)
-            .numbers(true)
-            .lowercase_letters(true)
-            .uppercase_letters(true)
-            .symbols(true)
-            .strict(true);
-        let password = pg.generate_one().unwrap();
+    pub fn update_hash(&mut self) {
+        let password = self.password.clone().expect("password expected");
         let salt = SaltString::generate(&mut OsRng);
         let params = Params::new(
             constants::ARGON2_DEFAULT_M_COST, // default for spring Argon2
@@ -102,7 +68,6 @@ impl UserModel {
             .expect("error create hash")
             .to_string();
         self.pwd_hash = Some(hash);
-        self.password = Some(password);
     }
 
     /// Validate user password

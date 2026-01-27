@@ -1,7 +1,6 @@
-use std::{fs, path::PathBuf};
-
 use clap::Args;
 use colored::Colorize;
+use std::{fs, path::PathBuf};
 
 use crate::{
     app::app_config::AppConfig,
@@ -30,7 +29,8 @@ pub struct ToolsArgs {
 pub async fn run(arg: ToolsArgs) {
     let config = match get_relative_path_canonicalize(&arg.config) {
         Some(path) => {
-            let contents = fs::read_to_string(path.clone()).expect(&format!("not read file: {}", path.to_string_lossy()));
+            let contents = fs::read_to_string(path.clone())
+                .expect(&format!("not read file: {}", path.to_string_lossy()));
             match hocon_rs::Config::parse_str::<AppConfig>(&contents, None) {
                 Ok(result) => result,
                 Err(_) => exit_error!("error read config"),
@@ -42,7 +42,8 @@ pub async fn run(arg: ToolsArgs) {
         match get_relative_path_canonicalize(&users) {
             Some(path) => {
                 // Read json
-                let data = fs::read_to_string(path.clone()).expect(&format!("not read file: {}", path.to_string_lossy()));
+                let data = fs::read_to_string(path.clone())
+                    .expect(&format!("not read file: {}", path.to_string_lossy()));
                 // Parse json
                 let mut list: Vec<UserModel> = serde_json::from_str(&data).unwrap();
                 // Create db instance
@@ -50,9 +51,9 @@ pub async fn run(arg: ToolsArgs) {
                 // Loop users
                 for user in &mut list {
                     // Gen random password for user
-                    user.password_up();
+                    user.update_hash();
                     // Insert data
-                    match UserService::new(&user, &pool).await {
+                    match UserService::insert(pool.get_owned().await.unwrap(), user).await {
                         Ok(_) => {
                             print_success!(
                                 "{} user {}, password: {}",

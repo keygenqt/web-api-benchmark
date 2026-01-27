@@ -1,9 +1,9 @@
 use axum::http::StatusCode;
-use deadpool_diesel::{
-    Manager, Pool, Runtime,
-    postgres::{self, Object},
+use diesel::result::Error;
+use diesel_async::{
+    AsyncMigrationHarness, AsyncPgConnection,
+    pooled_connection::{AsyncDieselConnectionManager, bb8},
 };
-use diesel::prelude::*;
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 
 use crate::app::{app_config::AppConfig, app_error::AppError};
@@ -14,8 +14,9 @@ pub mod services;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
-pub async fn configure_db(config: &AppConfig) -> Pool<Manager<PgConnection>> {
-    // Create connect url
+/// Init database connect
+pub async fn configure_db(config: &AppConfig) -> bb8::Pool<AsyncPgConnection> {
+    // create connect url
     let url = config.postgres.url.replace(
         "postgres://",
         &format!(
@@ -23,31 +24,23 @@ pub async fn configure_db(config: &AppConfig) -> Pool<Manager<PgConnection>> {
             config.postgres.user, config.postgres.password
         ),
     );
-    // Connect
-    let manager = postgres::Manager::new(url, Runtime::Tokio1);
-    let pool = postgres::Pool::builder(manager).build().unwrap();
-    // Migration
-    pool.get()
-        .await
-        .unwrap()
-        .interact(|conn| conn.run_pending_migrations(MIGRATIONS).map(|_| ()))
-        .await
-        .unwrap()
-        .unwrap();
-    // Result connection pool
+    // set up connection pool
+    let config = AsyncDieselConnectionManager::<diesel_async::AsyncPgConnection>::new(url);
+    let pool = bb8::Pool::builder().build(config).await.unwrap();
+    // migration
+    let mut harness = AsyncMigrationHarness::new(pool.get_owned().await.unwrap());
+    harness.run_pending_migrations(MIGRATIONS).unwrap();
+    // result
     pool
 }
 
-pub fn internal_error<E: std::error::Error>(err: E) -> AppError {
+pub fn db_handle_internal_error<E: std::error::Error>(err: E) -> AppError {
     AppError::new(StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
 }
 
-pub async fn get_poll(pool: &Pool<Manager<PgConnection>>) -> Result<Object, AppError> {
-    Ok(pool.get().await.map_err(internal_error)?)
-}
-
-pub fn map_poll<R>(
-    result: Result<Result<R, diesel::result::Error>, postgres::InteractError>,
-) -> Result<R, AppError> {
-    Ok(result.map_err(internal_error)?.map_err(internal_error)?)
+pub fn db_handle_error(err: Error) -> AppError {
+    match err {
+        Error::NotFound => AppError::new(StatusCode::NOT_FOUND, err.to_string()),
+        _ => AppError::new(StatusCode::INTERNAL_SERVER_ERROR, err.to_string()),
+    }
 }

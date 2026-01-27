@@ -1,48 +1,63 @@
-use deadpool_diesel::{Manager, Pool};
-use diesel::prelude::*;
-
 use crate::{
     app::app_error::AppError,
     db::{
-        self,
+        db_handle_error,
         entities::user_entity::{UserEntity, users_axum},
         models::user_model::UserModel,
     },
 };
 
+use crate::db::entities::user_entity::users_axum::dsl;
+use diesel::prelude::*;
+use diesel_async::{AsyncPgConnection, RunQueryDsl, pooled_connection::bb8::PooledConnection};
+
 pub struct UserService {}
 
+#[allow(unused)]
 impl UserService {
-    pub async fn new(
-        user: &UserModel,
-        pool: &Pool<Manager<PgConnection>>,
-    ) -> Result<UserModel, AppError> {
-        // Get manager
-        let poll = db::get_poll(pool).await?;
-        // Get entity for insert
-        let entity = user.as_new_entity();
-        // Query
-        let result = poll
-            .interact(|conn| {
-                diesel::insert_into(users_axum::table)
-                    .values(entity)
-                    .returning(UserEntity::as_returning())
-                    .get_result(conn)
-            })
-            .await;
-        // Result
-        Ok(UserModel::from_entity(&db::map_poll(result)?))
-    }
-
-    pub async fn get_list(pool: &Pool<Manager<PgConnection>>) -> Result<Vec<UserModel>, AppError> {
-        // Get manager
-        let poll = db::get_poll(pool).await?;
-        // Query
-        let result = poll.interact(|conn| UserEntity::query().load(conn)).await;
-        // Result
-        Ok(db::map_poll(result)?
+    /// Search user by fname and lname
+    pub async fn search(
+        mut conn: PooledConnection<'static, AsyncPgConnection>,
+        fname: Option<String>,
+        lname: Option<String>,
+    ) -> Result<Vec<UserModel>, AppError> {
+        let result: Vec<UserModel> = UserEntity::query()
+            .filter(dsl::fname.ilike(format!("%{}%", fname.unwrap_or("".to_string()))))
+            .filter(dsl::lname.ilike(format!("%{}%", lname.unwrap_or("".to_string()))))
+            .load(&mut conn)
+            .await
+            .map_err(db_handle_error)?
             .iter()
             .map(|e| UserModel::from_entity(e))
-            .collect())
+            .collect();
+        Ok(result)
+    }
+
+    /// Find entity by id
+    pub async fn find_by_id(
+        mut conn: PooledConnection<'static, AsyncPgConnection>,
+        id: i32,
+    ) -> Result<UserModel, AppError> {
+        let result = UserEntity::query()
+            .find(id)
+            .first(&mut conn)
+            .await
+            .map_err(db_handle_error)?;
+        Ok(UserModel::from_entity(&result))
+    }
+
+    /// Create new entity
+    pub async fn insert(
+        mut conn: PooledConnection<'static, AsyncPgConnection>,
+        user: &UserModel,
+    ) -> Result<UserModel, AppError> {
+        let entity = user.as_new_entity();
+        let result = diesel::insert_into(users_axum::table)
+            .values(entity)
+            .returning(UserEntity::as_returning())
+            .get_result(&mut conn)
+            .await
+            .map_err(db_handle_error)?;
+        Ok(UserModel::from_entity(&result))
     }
 }

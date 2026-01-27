@@ -2,6 +2,7 @@ package com.benchmark.db.services
 
 import com.benchmark.db.entities.User
 import com.benchmark.db.entities.UserEntity
+import com.benchmark.db.entities.toModel
 import com.benchmark.db.models.UserModel
 import com.benchmark.db.transaction
 import org.jetbrains.exposed.v1.core.isNotNull
@@ -32,13 +33,6 @@ class UserService(private val database: Database) {
      * Find all register user
      */
     suspend fun findAll(): List<UserModel> = database.transaction {
-        UserEntity.find { (User.pwdHash.isNotNull()) }.map {
-            UserModel(
-                email = it.email,
-                fname = it.fname,
-                lname = it.lname,
-                createAt = it.createAt.toEpochMilli(),
-            )
-        }
+        UserEntity.find { (User.pwdHash.isNotNull()) }.map { it.toModel() }
     }
 }

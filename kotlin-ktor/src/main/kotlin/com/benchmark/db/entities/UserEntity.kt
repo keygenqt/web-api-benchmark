@@ -1,5 +1,6 @@
 package com.benchmark.db.entities
 
+import com.benchmark.db.models.UserModel
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 import org.jetbrains.exposed.v1.dao.IntEntity
@@ -15,7 +16,7 @@ object User : IntIdTable("users_ktor") {
     val fname = varchar("fname", length = 255)
     val lname = varchar("lname", length = 255)
     val pwdHash = varchar("pwd_hash", length = 255)
-    val createAt = timestamp("created_at").defaultExpression(CurrentTimestamp)
+    val createAt = timestamp("create_at").defaultExpression(CurrentTimestamp)
 }
 
 /**
@@ -30,3 +31,11 @@ class UserEntity(id: EntityID<Int>) : IntEntity(id) {
     var pwdHash by User.pwdHash
     var createAt by User.createAt
 }
+
+fun UserEntity.toModel() = UserModel(
+    id = id.value,
+    email = email,
+    fname = fname,
+    lname = lname,
+    createAt = createAt.toEpochMilli(),
+)
