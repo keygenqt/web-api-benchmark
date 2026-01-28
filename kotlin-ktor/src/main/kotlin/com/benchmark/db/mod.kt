@@ -11,16 +11,16 @@ import java.nio.file.Paths
  * Init database
  */
 fun configureDatabase(
-    appConfig: AppConfig
+    config: AppConfig
 ): Database {
     val database = connect(
-        url = appConfig.postgres.url,
-        user = appConfig.postgres.user,
-        password = appConfig.postgres.password,
+        url = config.postgres.url,
+        user = config.postgres.user,
+        password = config.postgres.password,
     )
     val cwd = Paths.get("").toAbsolutePath()
     val locations = mutableListOf("filesystem:${cwd}/migrations").apply {
-        if (appConfig.server.development) {
+        if (config.server.development) {
             add("filesystem:${cwd}/../../migrations")
         }
     }
@@ -29,7 +29,7 @@ fun configureDatabase(
         .sqlMigrationPrefix("")
         .sqlMigrationSeparator("_")
         .locations(*locations.toTypedArray())
-        .dataSource(appConfig.postgres.url, appConfig.postgres.user, appConfig.postgres.password)
+        .dataSource(config.postgres.url, config.postgres.user, config.postgres.password)
         .load()
     flyway.info()
     flyway.migrate()

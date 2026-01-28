@@ -5,7 +5,9 @@ import com.benchmark.db.entities.UserEntity
 import com.benchmark.db.entities.toModel
 import com.benchmark.db.models.UserModel
 import com.benchmark.db.transaction
-import org.jetbrains.exposed.v1.core.isNotNull
+import com.benchmark.utils.ilike
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.Database
 
 /**
@@ -13,7 +15,31 @@ import org.jetbrains.exposed.v1.jdbc.Database
  */
 class UserService(private val database: Database) {
     /**
-     * Create entity.
+     * Search user by fname and lname
+     */
+    suspend fun search(
+        fname: String,
+        lname: String,
+    ): List<UserModel> = database.transaction {
+        UserEntity.find { (User.fname ilike "%${fname}%") or (User.lname ilike "%${lname}%") }.map { it.toModel() }
+    }
+
+    /**
+     * Find entity by id
+     */
+    suspend fun findById(id: Int): UserModel? = database.transaction {
+        UserEntity.findById(id)?.toModel()
+    }
+
+    /**
+     * Find entity by email
+     */
+    suspend fun findByEmail(email: String): UserModel? = database.transaction {
+        UserEntity.find { (User.email eq email) }.firstOrNull()?.toModel(true)
+    }
+
+    /**
+     * Create new entity
      */
     suspend fun insert(
         email: String,
@@ -27,12 +53,5 @@ class UserService(private val database: Database) {
             this.lname = lname
             this.pwdHash = pwdHash
         }
-    }
-
-    /**
-     * Find all register user
-     */
-    suspend fun findAll(): List<UserModel> = database.transaction {
-        UserEntity.find { (User.pwdHash.isNotNull()) }.map { it.toModel() }
     }
 }

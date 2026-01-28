@@ -6,16 +6,24 @@ import com.benchmark.app.AppError
 import com.benchmark.app.Exceptions
 import com.benchmark.db.configureDatabase
 import com.benchmark.db.services.UserService
-import com.benchmark.route.guest.guestUsers
+import com.benchmark.route.guest.authBasic
+import com.benchmark.route.guest.authLogout
+import com.benchmark.route.user.usersFindById
+import com.benchmark.route.user.usersSearch
+import com.benchmark.utils.Constants
+import com.benchmark.utils.auth
+import com.benchmark.utils.session
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.http.content.*
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
@@ -29,18 +37,18 @@ import org.slf4j.event.Level as Slf4jLevel
  * Init Ktor server
  */
 fun Application.configureServer(
-    appConfig: AppConfig
+    config: AppConfig
 ) {
     // Logger
-    configureLogging(appConfig.server.development)
+    configureLogging(config.server.development)
     // Init database
-    val database = configureDatabase(appConfig)
+    val database = configureDatabase(config)
     // Init Koin
     install(Koin) {
-        printLogger(if (appConfig.server.development) KoinLevel.DEBUG else KoinLevel.NONE)
+        printLogger(if (config.server.development) KoinLevel.DEBUG else KoinLevel.NONE)
         modules(
             module {
-                single { appConfig }
+                single { config }
                 single { UserService(database) }
             }
         )
@@ -59,13 +67,26 @@ fun Application.configureServer(
     install(StatusPages) {
         configureHandleError()
     }
+    // Init session
+    install(Sessions) {
+        session(config.server.secret)
+    }
+    // Init auth
+    install(Authentication) {
+        auth()
+    }
     // Init Routing
     routing {
         staticResources("/", "assets") {
             enableAutoHeadResponse()
         }
         route("/api") {
-            guestUsers()
+            authBasic()
+            authLogout()
+            authenticate(Constants.SESSION_NAME) {
+                usersSearch()
+                usersFindById()
+            }
         }
     }
 }

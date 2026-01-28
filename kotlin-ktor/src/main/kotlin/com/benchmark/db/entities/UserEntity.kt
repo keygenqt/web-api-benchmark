@@ -32,10 +32,11 @@ class UserEntity(id: EntityID<Int>) : IntEntity(id) {
     var createAt by User.createAt
 }
 
-fun UserEntity.toModel() = UserModel(
+fun UserEntity.toModel(isHash: Boolean = false) = UserModel(
     id = id.value,
     email = email,
     fname = fname,
     lname = lname,
+    pwdHash = if (isHash) pwdHash else null,
     createAt = createAt.toEpochMilli(),
 )

@@ -18,6 +18,7 @@ data class AppConfig(
 @Serializable
 data class ServerConfig(
     val development: Boolean,
+    val secret: String,
 )
 
 /**

@@ -7,7 +7,7 @@ use crate::{
     utils::{constants, local_time},
 };
 
-/// GET basic auth cookie
+/// POST basic auth cookie
 /// /api/auth
 pub async fn basic(
     jar: PrivateCookieJar,
@@ -22,7 +22,7 @@ pub async fn basic(
     }
     // argon2 validate pass
     if !result.password_valid(&password.unwrap()) {
-        return Err(AppResponse::new_404());
+        return Err(AppResponse::new_403());
     }
     // get value string
     let model_json = serde_json::to_string(&UserAuth {
@@ -39,7 +39,7 @@ pub async fn basic(
     Ok((jar.add(token_hash), AppResponse::new_200()))
 }
 
-/// GET logout cookie
+/// DELETE logout cookie
 /// /api/logout
 pub async fn logout(jar: PrivateCookieJar) -> (PrivateCookieJar, AppResponse) {
     let cookie = Cookie::build(constants::SESSION_NAME).path("/");

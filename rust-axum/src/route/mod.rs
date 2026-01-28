@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::handler::HandlerWithoutStateExt;
 use axum::response::IntoResponse;
-use axum::routing::get;
+use axum::routing::{delete, get, post};
 use axum::{Router, middleware::Next};
 use axum::{extract::Request, middleware::from_fn, response::Response};
 use axum_extra::extract::cookie::Key;
@@ -27,8 +27,8 @@ pub async fn configure_route(config: &AppConfig) -> Router {
         pool: Arc::new(configure_db(config).await),
     };
     Router::new()
-        .route("/api/auth", get(guest::auth::basic))
-        .route("/api/logout", get(guest::auth::logout))
+        .route("/api/auth", post(guest::auth::basic))
+        .route("/api/logout", delete(guest::auth::logout))
         .route("/api/users", get(user::users::search))
         .route("/api/users/{id}", get(user::users::get_by_id))
         .with_state(state)

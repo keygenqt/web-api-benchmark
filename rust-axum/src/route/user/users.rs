@@ -31,7 +31,7 @@ pub async fn search(
     }
 }
 
-/// GET find by fname and lname
+/// GET find by user ID
 /// /api/users/{id}
 pub async fn get_by_id(
     AuthModel(user): AuthModel,
