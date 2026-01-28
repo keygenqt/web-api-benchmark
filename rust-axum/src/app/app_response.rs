@@ -7,14 +7,21 @@ use crate::app::app_json::AppJson;
 
 /// Application custom Error
 #[derive(Debug, Clone)]
-pub struct AppError {
+pub struct AppResponse {
     pub code: StatusCode,
     pub message: String,
 }
 
-impl AppError {
+impl AppResponse {
     pub fn new(code: StatusCode, message: String) -> Self {
         Self { code, message }
+    }
+
+    pub fn new_200() -> Self {
+        Self {
+            code: StatusCode::OK,
+            message: "Success".to_string(),
+        }
     }
 
     pub fn new_404() -> Self {
@@ -23,10 +30,17 @@ impl AppError {
             message: "Not Found".to_string(),
         }
     }
+
+    pub fn new_403() -> Self {
+        Self {
+            code: StatusCode::FORBIDDEN,
+            message: "Access denied".to_string(),
+        }
+    }
 }
 
 // Implementation axum response
-impl IntoResponse for AppError {
+impl IntoResponse for AppResponse {
     fn into_response(self) -> Response {
         // Response data
         #[derive(Serialize)]

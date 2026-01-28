@@ -22,12 +22,11 @@ pub struct UserModel {
     pub pwd_hash: Option<String>,
     #[serde(skip_serializing)]
     pub password: Option<String>,
-    #[serde(default = "utils::time::now")]
+    #[serde(default = "utils::local_time::chrono_time_now")]
     #[serde_as(as = "TimestampMilliSeconds<i64>")]
     pub create_at: NaiveDateTime,
 }
 
-#[allow(dead_code)]
 impl UserModel {
     pub fn from_entity(entity: &UserEntity) -> Self {
         Self {
@@ -72,7 +71,7 @@ impl UserModel {
 
     /// Validate user password
     pub fn password_valid(&self, password: &str) -> bool {
-        if let Some(hash) = &self.password {
+        if let Some(hash) = &self.pwd_hash {
             let params = Params::new(
                 constants::ARGON2_DEFAULT_M_COST,
                 Params::DEFAULT_T_COST,

@@ -55,15 +55,7 @@ pub async fn run(arg: ToolsArgs) {
                     // Insert data
                     match UserService::insert(pool.get_owned().await.unwrap(), user).await {
                         Ok(_) => {
-                            print_success!(
-                                "{} user {}, password: {}",
-                                "✓".green(),
-                                user.email.blue(),
-                                user.password
-                                    .clone()
-                                    .expect("password not available")
-                                    .cyan()
-                            )
+                            print_success!("{} user {}", "✓".green(), user.email.blue(),)
                         }
                         Err(err) => {
                             print_error!(

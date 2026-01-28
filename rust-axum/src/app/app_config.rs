@@ -12,6 +12,7 @@ pub struct AppConfig {
 #[derive(Deserialize, Clone)]
 pub struct ServerConfig {
     pub development: bool,
+    pub secret: String,
 }
 
 /// Server run params
