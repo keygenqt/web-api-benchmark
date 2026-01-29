@@ -14,7 +14,7 @@ fun Route.home() {
                 title { +"Welcome!" }
                 style {
                     unsafe {
-                        """
+                        +"""
                             html, body {
                                 font-family: Tahoma, Verdana, Arial, sans-serif;
                                 background: #1C1C1C;
@@ -36,7 +36,7 @@ fun Route.home() {
                             }
                             .Box {
                                 background-color: #00000096;
-                                border: 1px solid #F65500;
+                                border: 1px solid #7F52FF;
                                 border-radius: 20px;
                                 padding: 40px;
                                 text-align: center;
@@ -69,7 +69,7 @@ fun Route.home() {
                                 }
                                 div(classes = "Icon") {
                                     img(
-                                        src = "https://raw.gitcode.com/keygenqt_vz/web-api-benchmark/raw/main/rust-ktor/assets/kodee.svg",
+                                        src = "https://raw.gitcode.com/keygenqt_vz/web-api-benchmark/raw/main/kotlin-ktor/assets/kodee.svg",
                                         alt = "Kodee"
                                     )
                                 }
