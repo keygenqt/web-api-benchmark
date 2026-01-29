@@ -7,8 +7,9 @@ import com.benchmark.db.models.UserModel
 import com.benchmark.db.transaction
 import com.benchmark.utils.ilike
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.orWhere
+import org.jetbrains.exposed.v1.jdbc.selectAll
 
 /**
  * Service entity users table
@@ -18,10 +19,21 @@ class UserService(private val database: Database) {
      * Search user by fname and lname
      */
     suspend fun search(
-        fname: String,
-        lname: String,
+        fname: String?,
+        lname: String?,
     ): List<UserModel> = database.transaction {
-        UserEntity.find { (User.fname ilike "%${fname}%") or (User.lname ilike "%${lname}%") }.map { it.toModel() }
+        User
+            .selectAll()
+            .apply {
+                if (fname != null) {
+                    orWhere { (User.fname ilike "%${fname}%") }
+                }
+                if (fname != null) {
+                    orWhere { (User.lname ilike "%${lname}%") }
+                }
+            }
+            .map { UserEntity.wrapRow(it) }
+            .map { it.toModel() }
     }
 
     /**

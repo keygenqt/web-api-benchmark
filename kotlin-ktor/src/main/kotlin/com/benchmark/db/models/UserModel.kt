@@ -19,11 +19,18 @@ data class UserModel(
     @SerialName("create_at")
     val createAt: Long = System.currentTimeMillis(),
 ) {
+
+    /**
+     * Validate password for auth
+     */
     fun passwordValidate(password: String): Boolean {
         val encoder: Argon2PasswordEncoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
         return encoder.matches(password, this.pwdHash)
     }
 
+    /**
+     * Create hash from password for db
+     */
     fun updateHash(): UserModel {
         if (password != null) {
             val encoder: Argon2PasswordEncoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()

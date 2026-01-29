@@ -2,6 +2,7 @@ use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, registry, util::S
 
 use crate::app::app_config::AppConfig;
 
+/// Configure tracing
 pub fn configure_tracing(config: &AppConfig) {
     if config.server.development {
         let layer = EnvFilter::try_from_default_env()

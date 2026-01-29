@@ -11,6 +11,7 @@ use crate::{
     utils::{self, constants},
 };
 
+/// Model user entry [UserEntity]
 #[serde_as]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UserModel {
@@ -27,7 +28,9 @@ pub struct UserModel {
     pub create_at: NaiveDateTime,
 }
 
+/// Impl model user entry
 impl UserModel {
+    /// Convert to [UserModel]
     pub fn from_entity(entity: &UserEntity) -> Self {
         Self {
             id: Some(entity.id),
@@ -40,6 +43,7 @@ impl UserModel {
         }
     }
 
+    /// Convert to [UserNewEntity]
     pub fn as_new_entity(&self) -> UserNewEntity {
         UserNewEntity {
             email: self.email.clone(),
@@ -50,7 +54,7 @@ impl UserModel {
         }
     }
 
-    /// Create password hash
+    /// Create hash from password for db
     pub fn update_hash(&mut self) {
         let password = self.password.clone().expect("password expected");
         let salt = SaltString::generate(&mut OsRng);
@@ -69,7 +73,7 @@ impl UserModel {
         self.pwd_hash = Some(hash);
     }
 
-    /// Validate user password
+    /// Validate password for auth
     pub fn password_valid(&self, password: &str) -> bool {
         if let Some(hash) = &self.pwd_hash {
             let params = Params::new(

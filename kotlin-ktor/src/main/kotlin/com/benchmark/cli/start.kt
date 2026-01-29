@@ -34,23 +34,23 @@ class StartArgs : Callable<Int> {
 
     @OptIn(ExperimentalSerializationApi::class)
     override fun call(): Int {
-        // Show help
+        // show help
         if (help || config == null) {
             spec.commandLine().usage(System.out)
             return 0
         }
-        // Check path to configuration
+        // check path to configuration
         if (!config.exists() || !config.isFile) {
             throw IllegalArgumentException("File configuration not found.")
         }
-        // Load configuration
+        // load configuration
         val config = ConfigFactory.parseString(config.readText())
         val appConfig = Hocon.decodeFromConfig<AppConfig>(config)
-        // Start server
+        // start server
         embeddedServer(Netty, port = appConfig.deployment.port, host = appConfig.deployment.host) {
             configureServer(appConfig)
         }.start(wait = true)
-        // Exit success
+        // exit success
         return 0
     }
 }

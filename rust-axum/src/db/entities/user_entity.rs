@@ -3,6 +3,7 @@ use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_with::{TimestampMilliSeconds, serde_as};
 
+// Table users
 diesel::table! {
     users_axum (id) {
         id -> Integer,
@@ -14,6 +15,7 @@ diesel::table! {
     }
 }
 
+/// Entity
 #[serde_as]
 #[derive(Serialize, HasQuery)]
 #[diesel(table_name = users_axum)]
@@ -27,6 +29,7 @@ pub struct UserEntity {
     pub create_at: NaiveDateTime,
 }
 
+/// Entity new
 #[serde_as]
 #[derive(Deserialize, Insertable, Clone, Debug)]
 #[diesel(table_name = users_axum)]

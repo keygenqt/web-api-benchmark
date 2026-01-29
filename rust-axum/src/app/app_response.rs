@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use crate::app::app_json::AppJson;
 
-/// Application custom Error
+/// Application common response
 #[derive(Debug, Clone)]
 pub struct AppResponse {
     pub code: StatusCode,
@@ -39,18 +39,18 @@ impl AppResponse {
     }
 }
 
-// Implementation axum response
+/// Impl axum response
 impl IntoResponse for AppResponse {
     fn into_response(self) -> Response {
-        // Response data
+        // response data
         #[derive(Serialize)]
         struct ErrorResponse {
             code: u16,
             message: String,
         }
-        // Copy error
-        let err = self.clone();
-        // Create response
+        // copy app response
+        let app_response = self.clone();
+        // create response
         let mut response = (
             self.code,
             AppJson(ErrorResponse {
@@ -59,9 +59,9 @@ impl IntoResponse for AppResponse {
             }),
         )
             .into_response();
-        // Set error to response
-        response.extensions_mut().insert(Arc::new(err));
-        // Result
+        // set error to response
+        response.extensions_mut().insert(Arc::new(app_response));
+        // result
         response
     }
 }

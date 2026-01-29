@@ -41,18 +41,18 @@ pub async fn run(arg: ToolsArgs) {
     if let Some(users) = arg.users {
         match get_relative_path_canonicalize(&users) {
             Some(path) => {
-                // Read json
+                // read json
                 let data = fs::read_to_string(path.clone())
                     .expect(&format!("not read file: {}", path.to_string_lossy()));
-                // Parse json
+                // parse json
                 let mut list: Vec<UserModel> = serde_json::from_str(&data).unwrap();
-                // Create db instance
+                // create db instance
                 let pool = configure_db(&config).await;
-                // Loop users
+                // loop users
                 for user in &mut list {
-                    // Gen random password for user
+                    // gen random password for user
                     user.update_hash();
-                    // Insert data
+                    // insert data
                     match UserService::insert(pool.get_owned().await.unwrap(), user).await {
                         Ok(_) => {
                             print_success!("{} user {}", "✓".green(), user.email.blue(),)

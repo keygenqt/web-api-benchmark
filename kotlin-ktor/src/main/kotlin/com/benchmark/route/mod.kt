@@ -21,6 +21,7 @@ import io.ktor.server.http.content.*
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
@@ -39,11 +40,11 @@ import org.slf4j.event.Level as Slf4jLevel
 fun Application.configureServer(
     config: AppConfig
 ) {
-    // Logger
+    // init logger
     configureLogging(config.server.development)
-    // Init database
+    // init database
     val database = configureDatabase(config)
-    // Init Koin
+    // init DI Koin
     install(Koin) {
         printLogger(if (config.server.development) KoinLevel.DEBUG else KoinLevel.NONE)
         modules(
@@ -53,7 +54,7 @@ fun Application.configureServer(
             }
         )
     }
-    // Init response
+    // init response
     install(ContentNegotiation) {
         json(
             Json {
@@ -63,19 +64,21 @@ fun Application.configureServer(
             }
         )
     }
-    // Init catch errors
+    // init catch errors
     install(StatusPages) {
         configureHandleError()
     }
-    // Init session
+    // init session
     install(Sessions) {
         session(config.server.secret)
     }
-    // Init auth
+    // init auth
     install(Authentication) {
         auth()
     }
-    // Init Routing
+    // init Type-safe routing
+    install(Resources)
+    // init Routing
     routing {
         staticResources("/", "assets") {
             enableAutoHeadResponse()
@@ -91,6 +94,9 @@ fun Application.configureServer(
     }
 }
 
+/**
+ * Configure tracing
+ */
 private fun Application.configureLogging(
     isDevelopment: Boolean
 ) {
@@ -105,7 +111,7 @@ private fun Application.configureLogging(
 }
 
 /**
- * Catch errors.
+ * Catch errors
  */
 private fun StatusPagesConfig.configureHandleError() {
     status(HttpStatusCode.Unauthorized, HttpStatusCode.NotFound) { call, cause ->

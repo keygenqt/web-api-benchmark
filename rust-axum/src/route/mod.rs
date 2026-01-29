@@ -19,6 +19,7 @@ mod guest;
 #[path = "user/mod.rs"]
 mod user;
 
+/// Init Axum server
 pub async fn configure_route(config: &AppConfig) -> Router {
     let state = AppState {
         jkey: Arc::new(Key::from(config.server.secret.as_bytes())),
@@ -36,10 +37,12 @@ pub async fn configure_route(config: &AppConfig) -> Router {
         .fallback_service(ServeDir::new("assets").not_found_service(handle_404.into_service()))
 }
 
+/// Handle route 404
 async fn handle_404() -> impl IntoResponse {
     AppResponse::new_404()
 }
 
+/// Handle any error for tracing
 async fn log_app_errors(request: Request, next: Next) -> Response {
     let response = next.run(request).await;
     if let Some(err) = response.extensions().get::<Arc<AppResponse>>() {

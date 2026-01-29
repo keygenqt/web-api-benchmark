@@ -32,6 +32,9 @@ class UserEntity(id: EntityID<Int>) : IntEntity(id) {
     var createAt by User.createAt
 }
 
+/**
+ * Extension convert to [UserModel]
+ */
 fun UserEntity.toModel(isHash: Boolean = false) = UserModel(
     id = id.value,
     email = email,

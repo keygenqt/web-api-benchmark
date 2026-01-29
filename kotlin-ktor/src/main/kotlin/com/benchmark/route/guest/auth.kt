@@ -3,7 +3,7 @@ package com.benchmark.route.guest
 import com.benchmark.app.Exceptions
 import com.benchmark.db.models.UserAuth
 import com.benchmark.db.services.UserService
-import com.benchmark.utils.StatusResponse
+import com.benchmark.app.StatusResponse
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
@@ -18,12 +18,12 @@ fun Route.authBasic() {
     val dataService: UserService by inject()
     route("/auth") {
         post {
-            val credentials = call.request.basicAuthenticationCredentials() ?: throw Exceptions.Unauthorized()
+            val credentials = call.request.basicAuthenticationCredentials() ?: throw Exceptions.Forbidden()
             // find user
             val result = dataService.findByEmail(credentials.name) ?: throw Exceptions.NotFound()
             // argon2 validate pass
             if (!result.passwordValidate(credentials.password)) {
-                throw Exceptions.Unauthorized()
+                throw Exceptions.Forbidden()
             }
             // get auth model
             val userAuth = UserAuth(

@@ -34,10 +34,12 @@ pub async fn configure_db(config: &AppConfig) -> bb8::Pool<AsyncPgConnection> {
     pool
 }
 
+// Handle INTERNAL_SERVER_ERROR db to response
 pub fn db_handle_internal_error<E: std::error::Error>(err: E) -> AppResponse {
     AppResponse::new(StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
 }
 
+// Handle any error db to response
 pub fn db_handle_error(err: Error) -> AppResponse {
     match err {
         Error::NotFound => AppResponse::new(StatusCode::NOT_FOUND, err.to_string()),

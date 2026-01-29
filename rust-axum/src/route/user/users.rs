@@ -10,6 +10,7 @@ use crate::{
     db::{models::user_model::UserModel, services::user_service::UserService},
 };
 
+/// Query params
 #[derive(Deserialize)]
 pub struct SearchParams {
     fname: Option<String>,

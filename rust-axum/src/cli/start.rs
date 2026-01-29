@@ -28,12 +28,12 @@ pub async fn run(arg: StartArgs) {
                 Ok(result) => result,
                 Err(_) => exit_error!("error read config"),
             };
-            // Register tracing
+            // register tracing
             configure_tracing(&config);
-            // Init tcp listener
+            // init tcp listener
             let route = format!("{}:{}", config.deployment.host, config.deployment.port);
             let listener = tokio::net::TcpListener::bind(route).await.unwrap();
-            // Print start message
+            // print start message
             if config.server.development {
                 tracing::debug!(
                     "The server has started. Listening on http://{}",
@@ -45,7 +45,7 @@ pub async fn run(arg: StartArgs) {
                     listener.local_addr().unwrap()
                 )
             }
-            // Start server
+            // start server
             let _ = axum::serve(listener, route::configure_route(&config).await).await;
         }
         None => exit_error!("not found path to config"),

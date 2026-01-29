@@ -1,9 +1,9 @@
-package com.benchmark.utils
+package com.benchmark.app
 
 import kotlinx.serialization.Serializable
 
 /**
- * Common response
+ * Application common response
  */
 @Serializable
 data class StatusResponse(val code: Int, val message: String)

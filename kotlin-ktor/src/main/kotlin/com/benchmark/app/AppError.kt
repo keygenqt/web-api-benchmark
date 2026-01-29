@@ -22,7 +22,7 @@ sealed class Exceptions(
         override val status: HttpStatusCode = HttpStatusCode.NotFound
     ) : Exceptions(status)
 
-    data class Unauthorized(
-        override val status: HttpStatusCode = HttpStatusCode.Unauthorized
+    data class Forbidden(
+        override val status: HttpStatusCode = HttpStatusCode.Forbidden
     ) : Exceptions(status)
 }

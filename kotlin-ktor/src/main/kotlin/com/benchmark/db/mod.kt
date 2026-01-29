@@ -13,17 +13,20 @@ import java.nio.file.Paths
 fun configureDatabase(
     config: AppConfig
 ): Database {
+    // connect to db
     val database = connect(
         url = config.postgres.url,
         user = config.postgres.user,
         password = config.postgres.password,
     )
+    // location migrations
     val cwd = Paths.get("").toAbsolutePath()
     val locations = mutableListOf("filesystem:${cwd}/migrations").apply {
         if (config.server.development) {
             add("filesystem:${cwd}/../../migrations")
         }
     }
+    // migration
     val flyway = Flyway.configure()
         .baselineOnMigrate(true)
         .sqlMigrationPrefix("")
@@ -33,11 +36,12 @@ fun configureDatabase(
         .load()
     flyway.info()
     flyway.migrate()
+    // result
     return database
 }
 
 /**
- * Extension transaction.
+ * Extension transaction
  */
 suspend fun <T> Database.transaction(block: suspend () -> T): T {
     return suspendTransaction(this) { block() }

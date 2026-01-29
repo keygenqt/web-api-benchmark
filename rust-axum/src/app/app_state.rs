@@ -21,14 +21,14 @@ pub struct AppState {
     pub pool: Arc<bb8::Pool<AsyncPgConnection>>,
 }
 
-// PrivateCookieJar
+/// Impl PrivateCookieJar
 impl FromRef<AppState> for Key {
     fn from_ref(state: &AppState) -> Self {
         (*state.jkey).clone()
     }
 }
 
-// AppConfig
+/// Impl for route AppConfig
 #[allow(unused)]
 pub struct Config(pub Arc<AppConfig>);
 
@@ -44,7 +44,7 @@ impl FromRequestParts<AppState> for Config {
     }
 }
 
-// UserModel
+/// Impl for route UserModel
 pub struct AuthModel(pub Arc<Option<UserAuth>>);
 
 impl FromRequestParts<AppState> for AuthModel {
@@ -88,7 +88,7 @@ impl FromRequestParts<AppState> for AuthModel {
     }
 }
 
-// AsyncPgConnection
+/// Impl for route AsyncPgConnection
 pub struct Db(pub bb8::PooledConnection<'static, AsyncPgConnection>);
 
 impl FromRequestParts<AppState> for Db {

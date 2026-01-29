@@ -43,23 +43,23 @@ class ToolsArgs : Callable<Int> {
 
     @OptIn(ExperimentalSerializationApi::class)
     override fun call(): Int {
-        // Show help
+        // show help
         if (help || config == null) {
             spec.commandLine().usage(System.out)
             return 0
         }
-        // Check path to configuration
+        // check path to configuration
         if (!config.exists() || !config.isFile) {
             throw IllegalArgumentException("File configuration not found.")
         }
-        // Load configuration
+        // load configuration
         val config = ConfigFactory.parseString(config.readText())
         val appConfig = Hocon.decodeFromConfig<AppConfig>(config)
-        // Run users import
+        // run users import
         if (users != null) {
             return importUsers(appConfig, users)
         }
-        // Exit success
+        // exit success
         return 0
     }
 
@@ -67,17 +67,17 @@ class ToolsArgs : Callable<Int> {
         if (!pathJson.exists() || !pathJson.isFile) {
             throw IllegalArgumentException("File JSON for import users not found.")
         }
-        // Init db logger level
+        // init db logger level
         (LoggerFactory.getLogger(ROOT_LOGGER_NAME) as Logger).apply {
             level = Level.OFF
         }
-        // Init database
+        // init database
         val database = configureDatabase(config)
-        // Init user service db
+        // init user service db
         val userService = UserService(database)
-        // Read json, parse
+        // read json, parse
         val usersJson: List<UserModel> = Json.decodeFromString(pathJson.readText())
-        // Loop users
+        // loop users
         usersJson.forEach { model ->
             val user = model.updateHash()
             try {
