@@ -17,7 +17,7 @@ pub struct ToolsArgs {
     pub config: PathBuf,
 
     /// Import users from JSON
-    #[arg(long, value_name = "path")]
+    #[arg(short = 'u', long, value_name = "path")]
     pub users: Option<PathBuf>,
 
     /// Show this help message and exit

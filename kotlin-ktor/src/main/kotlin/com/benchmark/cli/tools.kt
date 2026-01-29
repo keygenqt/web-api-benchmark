@@ -88,7 +88,7 @@ class ToolsArgs : Callable<Int> {
                         lname = user.lname,
                         pwdHash = user.pwdHash!!,
                     )
-                    println("""✓ user ${user.email}, password: ${user.password}""")
+                    println("""✓ user ${user.email}""")
                 }
             } catch (e: Exception) {
                 println(
