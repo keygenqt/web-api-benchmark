@@ -42,6 +42,7 @@ dependencies {
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.server.content.json)
     implementation(libs.ktor.server.call.logging)
+    implementation(libs.ktor.server.html.builder)
 
     // DB
     implementation(libs.postgresql)
@@ -71,4 +72,5 @@ dependencies {
     // Other
     implementation(libs.logback.classic)
     implementation(libs.picocli)
+    implementation(libs.kotlinx.html)
 }

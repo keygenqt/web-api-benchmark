@@ -1,65 +1,86 @@
 package com.benchmark.route.guest
 
-import com.benchmark.app.Exceptions
-import com.benchmark.db.models.UserAuth
-import com.benchmark.db.services.UserService
-import com.benchmark.app.StatusResponse
-import io.ktor.http.*
-import io.ktor.server.auth.*
-import io.ktor.server.response.*
+import io.ktor.server.html.*
 import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
-import org.koin.ktor.ext.inject
+import kotlinx.html.*
 
 /**
- * POST basic auth cookie
+ * GET home page
  */
-fun Route.authBasic() {
-    val dataService: UserService by inject()
-    route("/auth") {
-        post {
-            val credentials = call.request.basicAuthenticationCredentials() ?: throw Exceptions.Forbidden()
-            // find user
-            val result = dataService.findByEmail(credentials.name) ?: throw Exceptions.NotFound()
-            // argon2 validate pass
-            if (!result.passwordValidate(credentials.password)) {
-                throw Exceptions.Forbidden()
+fun Route.home() {
+    get("/") {
+        call.respondHtml {
+            head {
+                title { +"Welcome!" }
+                style {
+                    unsafe {
+                        """
+                            html, body {
+                                font-family: Tahoma, Verdana, Arial, sans-serif;
+                                background: #1C1C1C;
+                                color: white;
+                                height: 100%;
+                                width: 100%;
+                                padding: 0;
+                                margin: 0;
+                            }
+                            .Root-Table {
+                                padding: 0;
+                                height: 100%;
+                                width: 100%;
+                                max-width: 700px;
+                                margin: 0 auto;
+                            }
+                            .Root-Table .Root-Td {
+                                padding: 30px;
+                            }
+                            .Box {
+                                background-color: #00000096;
+                                border: 1px solid #F65500;
+                                border-radius: 20px;
+                                padding: 40px;
+                                text-align: center;
+                            }
+                            .Box h1 {
+                                margin: 0;
+                            }
+                            .Box .Icon {
+                                width: 150px;
+                                height: 150px;
+                                display: flex;
+                                justify-content: center;
+                                justify-items: center;
+                                margin: 0 auto;
+                            }
+                            .Box .Icon img {
+                                width: 124px;
+                            }
+                        """.trimIndent()
+                    }
+                }
             }
-            // get auth model
-            val userAuth = UserAuth(
-                id = result.id!!,
-                email = result.email,
-            )
-            // clear session if exist
-            call.sessions.clear<UserAuth>()
-            // set new session
-            call.sessions.set(userAuth)
-            // result
-            call.respond(
-                StatusResponse(
-                    code = HttpStatusCode.OK.value,
-                    message = HttpStatusCode.OK.description
-                )
-            )
-        }
-    }
-}
-
-/**
- * DELETE logout cookie
- */
-fun Route.authLogout() {
-    route("/logout") {
-        delete {
-            // clear session if exist
-            call.sessions.clear<UserAuth>()
-            // result
-            call.respond(
-                StatusResponse(
-                    code = HttpStatusCode.OK.value,
-                    message = HttpStatusCode.OK.description
-                )
-            )
+            body {
+                table(classes = "Root-Table") {
+                    tr(classes = "Root-Tr") {
+                        td(classes = "Root-Td") {
+                            div(classes = "Box") {
+                                h1 {
+                                    +"Welcome!"
+                                }
+                                div(classes = "Icon") {
+                                    img(
+                                        src = "https://raw.gitcode.com/keygenqt_vz/web-api-benchmark/raw/main/rust-ktor/assets/kodee.svg",
+                                        alt = "Kodee"
+                                    )
+                                }
+                                div {
+                                    +"REST API written in Kotlin & Ktor."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

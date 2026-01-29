@@ -8,6 +8,7 @@ import com.benchmark.db.configureDatabase
 import com.benchmark.db.services.UserService
 import com.benchmark.route.guest.authBasic
 import com.benchmark.route.guest.authLogout
+import com.benchmark.route.guest.home
 import com.benchmark.route.user.usersFindById
 import com.benchmark.route.user.usersSearch
 import com.benchmark.utils.Constants
@@ -17,7 +18,6 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.http.content.*
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
@@ -80,9 +80,7 @@ fun Application.configureServer(
     install(Resources)
     // init Routing
     routing {
-        staticResources("/", "assets") {
-            enableAutoHeadResponse()
-        }
+        home()
         route("/api") {
             authBasic()
             authLogout()

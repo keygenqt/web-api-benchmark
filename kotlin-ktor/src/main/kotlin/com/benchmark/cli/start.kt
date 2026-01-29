@@ -49,6 +49,9 @@ class StartArgs : Callable<Int> {
         // start server
         embeddedServer(Netty, port = appConfig.deployment.port, host = appConfig.deployment.host) {
             configureServer(appConfig)
+            if (!appConfig.server.development) {
+                println("The server has started. Listening on http://${appConfig.deployment.host}:${appConfig.deployment.port}")
+            }
         }.start(wait = true)
         // exit success
         return 0
