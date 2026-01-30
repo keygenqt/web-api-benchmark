@@ -4,7 +4,7 @@ export PROJECTS_DIR="BUILDS"
 
 export POSTGRES_DB="postgres"
 export POSTGRES_USER="postgres"
-export POSTGRES_PASSWORD="334400ddgg"
+export POSTGRES_PASSWORD="000000"
 
 export PROJECT_AXUM="rust-axum"
 export PROJECT_AXUM_PORT="3001"
