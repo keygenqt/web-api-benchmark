@@ -1,0 +1,87 @@
+name: kotlin-ktor-server
+
+services:
+  postgres:
+    container_name: kks-database
+    platform: linux/x86_64
+    build:
+      context: .
+      dockerfile: db/Dockerfile
+    restart: always
+    tty: true
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./db/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - internal
+
+  phpmyadmin:
+    container_name: abs-phpmyadmin
+    depends_on:
+      db:
+        condition: service_started
+    image: phpmyadmin
+    restart: always
+    tty: true
+    ports:
+      - ${PORT_MY_ADMIN}:80
+    environment:
+      PMA_HOST: db
+      UPLOAD_LIMIT: 25M
+    volumes:
+      - ./configurations/phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
+      - ./configurations/phpmyadmin/config.secret.inc.php:/etc/phpmyadmin/config.secret.inc.php
+    networks:
+      - internal
+
+  gradle:
+    container_name: abs-kotlin-build
+    depends_on:
+      mdbook:
+        condition: service_completed_successfully
+    restart: no
+    tty: true
+    build:
+      context: .
+      dockerfile: java/Dockerfile
+    command:
+      - /bin/bash
+      - -c
+      - |
+        ./gradlew buildFatJar
+    working_dir: /var/www
+    volumes:
+      - ../:/var/www
+      - ./configurations/server/application.conf:/var/www/src/main/resources/application.conf
+
+  java:
+    container_name: abs-run
+    depends_on:
+      gradle:
+        condition: service_completed_successfully
+      opensearch-node:
+        condition: service_started
+    build:
+      context: .
+      dockerfile: java/Dockerfile
+    restart: always
+    tty: true
+    command: "java -jar build/libs/kotlin-ktor.jar"
+    ports:
+      - ${PORT_API}:3024
+    working_dir: /var/www
+    volumes:
+      - ../:/var/www
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  kks-database:
