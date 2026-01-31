@@ -23,7 +23,7 @@ sleep 30s
 
 # Run axum tests
 echo "## Run tests Axum... #########################"
-docker run -e K6_LOG_OUTPUT=none --rm \
+docker run -e K6_LOG_OUTPUT=none --rm -u $(id -u) \
     --add-host host.docker.internal:host-gateway \
     -v $PWD/tests:/tests \
     -v $PWD/$TESTS_DIR:/$TESTS_DIR \
@@ -32,7 +32,7 @@ docker run -e K6_LOG_OUTPUT=none --rm \
     -o web-dashboard=export="/$TESTS_DIR/report_tests_axum.html" \
     /tests/run_all.js
 
-echo "## Done! Run (macOS): open -a 'Google Chrome' $PWD/$TESTS_DIR/report_tests_axum.html"
+echo "## Axum done, report: $PWD/$TESTS_DIR/report_tests_axum.html"
 
 # 30 seconds rest from the previous test
 echo "## Get some rest cpu #########################"
@@ -40,7 +40,7 @@ sleep 30s
 
 # Run ktor tests
 echo "## Run tests Ktor... #########################"
-docker run -e K6_LOG_OUTPUT=none --rm \
+docker run -e K6_LOG_OUTPUT=none --rm -u $(id -u) \
     --add-host host.docker.internal:host-gateway \
     -v $PWD/tests:/tests \
     -v $PWD/$TESTS_DIR:/$TESTS_DIR \
@@ -49,4 +49,4 @@ docker run -e K6_LOG_OUTPUT=none --rm \
     -o web-dashboard=export="/$TESTS_DIR/report_tests_ktor.html" \
     /tests/run_all.js
 
-echo "## Done! Run (macOS): open -a 'Google Chrome' $PWD/$TESTS_DIR/report_tests_ktor.html"
+echo "## Ktor done, report: $PWD/$TESTS_DIR/report_tests_ktor.html"
