@@ -1,0 +1,132 @@
+name: rust-axum-server
+
+services:
+  # Build
+  gradle:
+    container_name: ras-build
+    image: rust:1.93.0-bookworm
+    command:
+      - /bin/bash
+      - -c
+      - |
+        ################################
+        ## Build project rust-axum
+        ################################
+        cargo build --release
+
+        ################################
+        ## Create app config from .env
+        ################################
+        cat > target/release/application.conf <<EOF
+        server {
+          development = false
+          secret = ${API_SECRET}
+        }
+        deployment {
+          host = 0.0.0.0
+          port = 3000
+        }
+        postgres {
+          url = "postgres://postgres:5432/${POSTGRES_DB}"
+          user = "${POSTGRES_USER}"
+          password = "${POSTGRES_PASSWORD}"
+        }
+        EOF
+
+        ################################
+        ## Create connect config pgadmin
+        ################################
+        cat > target/release/pgadmin_servers.json <<EOF
+        {
+          "Servers": {
+            "1": {
+              "Name": "My Local PostgresSQL Database",
+              "Group": "Servers",
+              "Host": "postgres",
+              "Port": 5432,
+              "MaintenanceDB": "${POSTGRES_DB}",
+              "Username": "${POSTGRES_USER}",
+              "SSLMode": "prefer",
+              "Comment": "Automatically connected server via Docker Compose."
+            }
+          }
+        }
+        EOF
+    working_dir: /var/www
+    volumes:
+      - ../:/var/www
+
+  # Db run
+  postgres:
+    container_name: ras-postgres
+    image: postgres:18.1-alpine
+    depends_on:
+      gradle:
+        condition: service_completed_successfully
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - internal
+
+  # pgAdmin run
+  pgadmin:
+    container_name: ras-pgadmin
+    image: dpage/pgadmin4:9.11.0
+    depends_on:
+      postgres:
+        condition: service_started
+      gradle:
+        condition: service_completed_successfully
+    restart: always
+    ports:
+      - ${PGADMIN_PORT}:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    volumes:
+      - ../target/release/pgadmin_servers.json:/pgadmin4/servers.json
+    networks:
+      - internal
+
+  # API server run
+  rust:
+    container_name: ras-run
+    image: rust:1.93.0-bookworm
+    depends_on:
+      postgres:
+        condition: service_started
+      gradle:
+        condition: service_completed_successfully
+    restart: always
+    command:
+      - /bin/bash
+      - -c
+      - |
+        ################################
+        ## Import users to API
+        ################################
+        ./rust-axum tools --config application.conf --users /var/project/data/users.json
+
+        ################################
+        ## Run API server
+        ################################
+        ./rust-axum start --config application.conf
+    ports:
+      - ${API_PORT}:3000
+    working_dir: /var/www/target/release
+    volumes:
+      - ../../:/var/project
+      - ../:/var/www
+      - ../migrations:/var/www/target/release/migrations
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  ras-postgres:

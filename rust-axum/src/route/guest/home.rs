@@ -1,13 +1,12 @@
 use axum::response::Html;
 
-use crate::{
-    app::{app_response::AppResponse},
-};
+use crate::app::app_response::AppResponse;
 
 /// GET home page
 /// /
 pub async fn index() -> Result<Html<&'static str>, AppResponse> {
-    Ok(Html(r#"<!DOCTYPE html>
+    Ok(Html(
+        r#"<!DOCTYPE html>
 <html>
   <head>
     <title>Welcome!</title>
@@ -65,5 +64,6 @@ pub async fn index() -> Result<Html<&'static str>, AppResponse> {
       </tr>
     </table>
   </body>
-</html>"#))
+</html>"#,
+    ))
 }

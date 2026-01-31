@@ -79,6 +79,11 @@ class ToolsArgs : Callable<Int> {
         val usersJson: List<UserModel> = Json.decodeFromString(pathJson.readText())
         // loop users
         usersJson.forEach { model ->
+            val find = runBlocking { userService.findByEmail(email = model.email) }
+            if (find != null) {
+                println("""✗ user ${find.email}: already exists""")
+                return@forEach
+            }
             val user = model.updateHash()
             try {
                 runBlocking {
