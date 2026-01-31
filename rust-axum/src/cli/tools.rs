@@ -50,6 +50,15 @@ pub async fn run(arg: ToolsArgs) {
                 let pool = configure_db(&config).await;
                 // loop users
                 for user in &mut list {
+                    if let Ok(find) = UserService::find_by_email(
+                        pool.get_owned().await.unwrap(),
+                        user.email.clone(),
+                    )
+                    .await
+                    {
+                        print_error!("{} user {}: already exists", "✗".red(), user.email.blue());
+                        continue;
+                    };
                     // gen random password for user
                     user.update_hash();
                     // insert data

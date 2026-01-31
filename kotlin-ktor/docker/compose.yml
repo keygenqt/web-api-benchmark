@@ -4,7 +4,7 @@ services:
   # Build
   gradle:
     container_name: kks-build
-    image: gradle:jdk24
+    image: gradle:jdk21
     command:
       - /bin/bash
       - -c
@@ -12,8 +12,8 @@ services:
         ################################
         ## Build project kotlin-ktor
         ################################
-        ./gradlew clean buildFatJar
-        
+        ./gradlew buildFatJar
+
         ################################
         ## Create app config from .env
         ################################
@@ -32,7 +32,7 @@ services:
           password = "${POSTGRES_PASSWORD}"
         }
         EOF
-        
+
         ################################
         ## Create connect config pgadmin
         ################################
@@ -94,7 +94,7 @@ services:
   # API server run
   java:
     container_name: kks-run
-    image: openjdk:24-rc-jdk-bookworm
+    image: openjdk:21-rc-jdk-bookworm
     depends_on:
       postgres:
         condition: service_started
@@ -109,7 +109,7 @@ services:
         ## Import users to API
         ################################
         java -jar kotlin-ktor.jar tools --config application.conf --users /var/project/data/users.json
-        
+
         ################################
         ## Run API server
         ################################
@@ -129,4 +129,4 @@ networks:
     driver: bridge
 
 volumes:
-  kks-database:
+  kks-postgres:
