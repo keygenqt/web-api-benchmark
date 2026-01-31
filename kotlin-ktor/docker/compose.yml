@@ -1,0 +1,132 @@
+name: kotlin-ktor-server
+
+services:
+  # Build
+  gradle:
+    container_name: kks-build
+    image: gradle:jdk21
+    command:
+      - /bin/bash
+      - -c
+      - |
+        ################################
+        ## Build project kotlin-ktor
+        ################################
+        ./gradlew buildFatJar
+
+        ################################
+        ## Create app config from .env
+        ################################
+        cat > build/libs/application.conf <<EOF
+        server {
+          development = false
+          secret = ${API_SECRET}
+        }
+        deployment {
+          host = 0.0.0.0
+          port = 3000
+        }
+        postgres {
+          url = "jdbc:postgresql://postgres:5432/${POSTGRES_DB}"
+          user = "${POSTGRES_USER}"
+          password = "${POSTGRES_PASSWORD}"
+        }
+        EOF
+
+        ################################
+        ## Create connect config pgadmin
+        ################################
+        cat > build/libs/pgadmin_servers.json <<EOF
+        {
+          "Servers": {
+            "1": {
+              "Name": "My Local PostgresSQL Database",
+              "Group": "Servers",
+              "Host": "postgres",
+              "Port": 5432,
+              "MaintenanceDB": "${POSTGRES_DB}",
+              "Username": "${POSTGRES_USER}",
+              "SSLMode": "prefer",
+              "Comment": "Automatically connected server via Docker Compose."
+            }
+          }
+        }
+        EOF
+    working_dir: /var/www
+    volumes:
+      - ../:/var/www
+
+  # Db run
+  postgres:
+    container_name: kks-postgres
+    image: postgres:18.1-alpine
+    depends_on:
+      gradle:
+        condition: service_completed_successfully
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - internal
+
+  # pgAdmin run
+  pgadmin:
+    container_name: kks-pgadmin
+    image: dpage/pgadmin4:9.11.0
+    depends_on:
+      postgres:
+        condition: service_started
+      gradle:
+        condition: service_completed_successfully
+    restart: always
+    ports:
+      - ${PGADMIN_PORT}:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    volumes:
+      - ../build/libs/pgadmin_servers.json:/pgadmin4/servers.json
+    networks:
+      - internal
+
+  # API server run
+  java:
+    container_name: kks-run
+    image: openjdk:21-rc-jdk-bookworm
+    depends_on:
+      postgres:
+        condition: service_started
+      gradle:
+        condition: service_completed_successfully
+    restart: always
+    command:
+      - /bin/bash
+      - -c
+      - |
+        ################################
+        ## Import users to API
+        ################################
+        java -jar kotlin-ktor.jar tools --config application.conf --users /var/project/data/users.json
+
+        ################################
+        ## Run API server
+        ################################
+        java -jar kotlin-ktor.jar start --config application.conf
+    ports:
+      - ${API_PORT}:3000
+    working_dir: /var/www/build/libs
+    volumes:
+      - ../../:/var/project
+      - ../:/var/www
+      - ../migrations:/var/www/build/libs/migrations
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  kks-postgres:

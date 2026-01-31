@@ -33,7 +33,7 @@ pub async fn configure_route(config: &AppConfig) -> Router {
         .route("/api/users/{id}", get(user::users::get_by_id))
         .with_state(state)
         .layer(from_fn(log_app_errors))
-        .fallback( handle_404)
+        .fallback(handle_404)
 }
 
 /// Handle route 404
