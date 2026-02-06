@@ -24,7 +24,7 @@ data class UserModel(
      * Validate password for auth
      */
     fun passwordValidate(password: String): Boolean {
-        val encoder: Argon2PasswordEncoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
+        val encoder= Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
         return encoder.matches(password, this.pwdHash)
     }
 
@@ -33,7 +33,7 @@ data class UserModel(
      */
     fun updateHash(): UserModel {
         if (password != null) {
-            val encoder: Argon2PasswordEncoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
+            val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
             val hash = encoder.encode(password)
             return this.copy(pwdHash = hash)
         }

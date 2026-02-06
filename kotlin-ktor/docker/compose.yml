@@ -2,7 +2,7 @@ name: kotlin-ktor-server
 
 services:
   # Build
-  gradle:
+  build:
     container_name: kks-build
     image: gradle:jdk21
     command:
@@ -61,7 +61,7 @@ services:
     container_name: kks-postgres
     image: postgres:18.1-alpine
     depends_on:
-      gradle:
+      build:
         condition: service_completed_successfully
     restart: always
     environment:
@@ -83,7 +83,7 @@ services:
     depends_on:
       postgres:
         condition: service_started
-      gradle:
+      build:
         condition: service_completed_successfully
     restart: always
     ports:
@@ -97,13 +97,13 @@ services:
       - internal
 
   # API server run
-  java:
+  run:
     container_name: kks-run
     image: openjdk:21-rc-jdk-bookworm
     depends_on:
       postgres:
         condition: service_healthy
-      gradle:
+      build:
         condition: service_completed_successfully
     restart: always
     command:

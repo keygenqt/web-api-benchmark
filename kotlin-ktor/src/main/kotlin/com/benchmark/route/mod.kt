@@ -2,8 +2,8 @@ package com.benchmark.route
 
 import ch.qos.logback.classic.Logger
 import com.benchmark.app.AppConfig
-import com.benchmark.app.AppError
 import com.benchmark.app.Exceptions
+import com.benchmark.app.StatusResponse
 import com.benchmark.db.configureDatabase
 import com.benchmark.db.services.UserService
 import com.benchmark.route.guest.authBasic
@@ -115,7 +115,7 @@ private fun StatusPagesConfig.configureHandleError() {
     status(HttpStatusCode.Unauthorized, HttpStatusCode.NotFound) { call, cause ->
         call.respond(
             status = cause,
-            message = AppError(
+            message = StatusResponse(
                 code = cause.value,
                 message = cause.description
             )
@@ -125,7 +125,7 @@ private fun StatusPagesConfig.configureHandleError() {
         if (cause is Exceptions) {
             call.respond(
                 status = cause.status,
-                message = AppError(
+                message = StatusResponse(
                     code = cause.status.value,
                     message = cause.status.description
                 )
@@ -133,7 +133,7 @@ private fun StatusPagesConfig.configureHandleError() {
         } else {
             call.respond(
                 status = HttpStatusCode.InternalServerError,
-                message = AppError(
+                message = StatusResponse(
                     code = HttpStatusCode.InternalServerError.value,
                     message = cause.message ?: HttpStatusCode.InternalServerError.description
                 )

@@ -25,8 +25,8 @@ pub struct ToolsArgs {
     pub help: Option<bool>,
 }
 
-#[allow(unused)]
 pub async fn run(arg: ToolsArgs) {
+    // load configuration
     let config = match get_relative_path_canonicalize(&arg.config) {
         Some(path) => {
             let contents = fs::read_to_string(path.clone())
@@ -50,7 +50,8 @@ pub async fn run(arg: ToolsArgs) {
                 let pool = configure_db(&config).await;
                 // loop users
                 for user in &mut list {
-                    if let Ok(find) = UserService::find_by_email(
+                    // check exist user
+                    if let Ok(_) = UserService::find_by_email(
                         pool.get_owned().await.unwrap(),
                         user.email.clone(),
                     )
@@ -59,7 +60,7 @@ pub async fn run(arg: ToolsArgs) {
                         print_error!("{} user {}: already exists", "✗".red(), user.email.blue());
                         continue;
                     };
-                    // gen random password for user
+                    // create hash password
                     user.update_hash();
                     // insert data
                     match UserService::insert(pool.get_owned().await.unwrap(), user).await {

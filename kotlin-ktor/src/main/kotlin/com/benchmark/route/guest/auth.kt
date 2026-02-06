@@ -18,9 +18,11 @@ fun Route.authBasic() {
     val dataService: UserService by inject()
     route("/auth") {
         post {
-            val credentials = call.request.basicAuthenticationCredentials() ?: throw Exceptions.Forbidden()
+            val credentials = call.request.basicAuthenticationCredentials()
+                ?: throw Exceptions.Forbidden()
             // find user
-            val result = dataService.findByEmail(credentials.name) ?: throw Exceptions.NotFound()
+            val result = dataService.findByEmail(credentials.name)
+                ?: throw Exceptions.NotFound()
             // argon2 validate pass
             if (!result.passwordValidate(credentials.password)) {
                 throw Exceptions.Forbidden()

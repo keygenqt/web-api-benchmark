@@ -79,12 +79,15 @@ class ToolsArgs : Callable<Int> {
         val usersJson: List<UserModel> = Json.decodeFromString(pathJson.readText())
         // loop users
         usersJson.forEach { model ->
+            // check exist user
             val find = runBlocking { userService.findByEmail(email = model.email) }
             if (find != null) {
                 println("""✗ user ${find.email}: already exists""")
                 return@forEach
             }
+            // create hash password
             val user = model.updateHash()
+            // insert data
             try {
                 runBlocking {
                     userService.insert(
@@ -98,7 +101,11 @@ class ToolsArgs : Callable<Int> {
             } catch (e: Exception) {
                 println(
                     """✗ user ${user.email}: ${
-                        e.message?.split("\n")?.lastOrNull()?.trim()?.split("  ")?.firstOrNull()
+                        e.message?.split("\n")
+                            ?.lastOrNull()
+                            ?.trim()
+                            ?.split("  ")
+                            ?.firstOrNull()
                     }"""
                 )
             }

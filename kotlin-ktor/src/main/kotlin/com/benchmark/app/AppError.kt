@@ -4,15 +4,6 @@ import io.ktor.http.*
 import kotlinx.serialization.Serializable
 
 /**
- * Application custom Error
- */
-@Serializable
-data class AppError(
-    val code: Int,
-    val message: String,
-)
-
-/**
  * Errors
  */
 sealed class Exceptions(

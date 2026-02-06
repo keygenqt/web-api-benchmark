@@ -57,7 +57,9 @@ pub async fn index() -> Result<Html<&'static str>, AppResponse> {
         <td class="Root-Td">
           <div class="Box">
             <h1>Welcome!</h1>
-            <div class="Icon"><img alt="Ferris" src="https://raw.gitcode.com/keygenqt_vz/web-api-benchmark/raw/main/rust-axum/assets/ferris.svg"/></div>
+            <div class="Icon">
+              <img alt="Ferris" src="https://raw.gitcode.com/keygenqt_vz/web-api-benchmark/raw/main/rust-axum/assets/ferris.svg"/>
+            </div>
             <div>REST API written in Kotlin &amp; Ktor.</div>
           </div>
         </td>
