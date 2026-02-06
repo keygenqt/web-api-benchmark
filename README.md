@@ -18,7 +18,7 @@ Reports in the form of HTML pages can be found in the project repository: [repor
 > Docker must be installed on the system.
 
 ```shell
-./scripts/all.sh
+./scripts/run_all.sh
 ```
 
 ![preview](data/preview-docker.png)
